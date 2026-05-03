@@ -1,12 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
-const path = require('path'); // <--- ADD THIS LINE HERE
+const path = require('path'); 
+const axios = require('axios');       // <--- ADDED: Needed for fetching CCU announcements
+const cheerio = require('cheerio');   // <--- ADDED: Needed for parsing HTML
+const https = require('https');       // <--- ADDED: Needed to bypass SSL
+const fs = require('fs');             // <--- ADDED: Needed for serving index.html at the bottom
 
+const PORT = process.env.PORT || 3000;
 const app = express();
-// ... the rest of your code
 
-// Your existing Firebase initialization code...
+// --- Firebase Initialization ---
 let serviceAccount;
 if (process.env.FIREBASE_KEY) {
     serviceAccount = JSON.parse(process.env.FIREBASE_KEY.trim());
@@ -18,7 +22,9 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
-// 3. Now you can use app.use(cors()) safely
+const db = admin.firestore(); // <--- ADDED: Crucial! Without this, your database queries will crash.
+
+// --- Middleware ---
 app.use(cors());
 app.use(express.json());
 
