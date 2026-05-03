@@ -8,18 +8,18 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const https = require('https');
 
-// 2. 宣告環境變數與建立 Express 實例（這兩行一定要在最前面！）
 const PORT = process.env.PORT || 3000;
-const app = express(); // <--- 必須先在這裡建立 app！
+const app = express(); // <--- 1. 建立 app
 
-// 3. 初始化 Firebase
+// ================= Firebase 初始化 =================
 let serviceAccount;
+
 if (process.env.FIREBASE_KEY) {
     try {
         serviceAccount = JSON.parse(process.env.FIREBASE_KEY.trim());
-        console.log("✅ 成功讀取並解析 Railway 環境變數 FIREBASE_KEY");
+        console.log("✅ 成功解析 Railway 環境變數 FIREBASE_KEY");
     } catch (err) {
-        console.error("❌ 解析 FIREBASE_KEY 失敗:", err.message);
+        console.error("❌ 解析 FIREBASE_KEY 環境變數失敗:", err.message);
         process.exit(1);
     }
 } else {
@@ -32,13 +32,19 @@ if (process.env.FIREBASE_KEY) {
     }
 }
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
-const db = admin.firestore();
+// 💡 加上防呆判斷：如果還沒初始化過，才進行 initializeApp
+if (!admin.apps.length) {
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+    });
+    console.log("🔥 Firebase 應用程式初始化成功");
+}
 
-// 4. 現在可以安全地使用 app 中介軟體（Middleware）了
-app.use(cors()); // <--- 現在 app 已經定義好了，不會再報錯！
+// 2. 務必在初始化完成後，將 db 宣告出來給全域使用
+const db = admin.firestore(); 
+
+// ================= Express 中介軟體 =================
+app.use(cors());
 app.use(express.json());
 
 // --- 通用通知函數 ---
