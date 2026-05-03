@@ -1,8 +1,10 @@
-const express = require('express'); // 1. Add this line to import Express
+const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
+const path = require('path'); // <--- ADD THIS LINE HERE
 
-const app = express(); // 2. Add this line to create the 'app' instance
+const app = express();
+// ... the rest of your code
 
 // Your existing Firebase initialization code...
 let serviceAccount;
