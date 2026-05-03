@@ -1,13 +1,13 @@
-# Sensitive keys and credentials
+# Node.js 依賴套件
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 密鑰檔案（最重要！）
 serviceAccountKey.json
 .env
 
-# Dependencies
-node_modules/
-
-# Editor specific settings
-.vscode/
-
-# OS specific files
+# 作業系統產生的檔案
 .DS_Store
 Thumbs.db
