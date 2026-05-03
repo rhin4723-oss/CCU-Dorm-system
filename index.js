@@ -23,19 +23,25 @@ if (!fs.existsSync(serviceAccountPath)) {
 }
 
 let serviceAccount;
-try {
-  serviceAccount = require(serviceAccountPath);
-} catch (error) {
-  console.error("❌ 金鑰檔案格式錯誤 (JSON Error):", error.message);
-  process.exit(1);
+
+if (process.env.FIREBASE_KEY) {
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+  } catch (error) {
+    console.error("Failed to parse FIREBASE_KEY from environment variables:", error);
+  }
+} else {
+  try {
+    serviceAccount = require('./serviceAccountKey.json');
+  } catch (error) {
+    console.error("❌ 嚴重錯誤：找不到 serviceAccountKey.json 檔案！");
+    process.exit(1);
+  }
 }
 
-// 初始化 Firebase Admin
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
 
 const db = admin.firestore();
 
