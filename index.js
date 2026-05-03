@@ -1,34 +1,17 @@
-const admin = require("firebase-admin");
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
-const axios = require("axios");
-const cheerio = require("cheerio");
-const https = require("https");
+const admin = require('firebase-admin');
 
-process.on("uncaughtException", (err) => {
-  console.error("🔥 伺服器發生致命錯誤:", err);
-});
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// --- 1. 安全性檢查：確認金鑰是否存在 ---
-const serviceAccountPath = path.join(__dirname, "serviceAccountKey.json");
-
-if (!fs.existsSync(serviceAccountPath)) {
-  console.error("❌ 嚴重錯誤：找不到 serviceAccountKey.json 檔案！");
-  process.exit(1);
-}
+console.log("=== SERVER STARTING ===");
+console.log("Checking for FIREBASE_KEY variable:", process.env.FIREBASE_KEY ? "FOUND IT!" : "MISSING!");
 
 let serviceAccount;
 
 if (process.env.FIREBASE_KEY) {
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+    console.log("Successfully parsed environment variable.");
   } catch (error) {
-    console.error("Failed to parse FIREBASE_KEY from environment variables:", error);
+    console.error("Failed to parse FIREBASE_KEY! Make sure it is valid JSON in Railway:", error.message);
+    process.exit(1);
   }
 } else {
   try {
@@ -42,8 +25,6 @@ if (process.env.FIREBASE_KEY) {
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
-
-const db = admin.firestore();
 
 // --- 2. Middleware 設定 ---
 app.use(cors());
