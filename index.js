@@ -1,32 +1,21 @@
-const admin = require("firebase-admin");
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
-const axios = require("axios");
-const cheerio = require("cheerio");
-const https = require("https");
+// 1. 先引入所有需要的套件
+const express = require('express');
+const cors = require('cors');
+const admin = require('firebase-admin');
+const path = require('path');
+const fs = require('fs');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const https = require('https');
 
-process.on("uncaughtException", (err) => {
-  console.error("🔥 伺服器發生致命錯誤:", err);
-});
-
-const app = express();
+// 2. 宣告環境變數與建立 Express 實例（這兩行一定要在最前面！）
 const PORT = process.env.PORT || 3000;
+const app = express(); // <--- 必須先在這裡建立 app！
 
-// --- 1. 安全性檢查：確認金鑰是否存在 ---
-const serviceAccountPath = path.join(__dirname, "serviceAccountKey.json");
-
-if (!fs.existsSync(serviceAccountPath)) {
-  console.error("❌ 嚴重錯誤：找不到 serviceAccountKey.json 檔案！");
-  process.exit(1);
-}
-
+// 3. 初始化 Firebase
 let serviceAccount;
-
 if (process.env.FIREBASE_KEY) {
     try {
-        // 讀取 Railway 上的環境變數
         serviceAccount = JSON.parse(process.env.FIREBASE_KEY.trim());
         console.log("✅ 成功讀取並解析 Railway 環境變數 FIREBASE_KEY");
     } catch (err) {
@@ -35,7 +24,6 @@ if (process.env.FIREBASE_KEY) {
     }
 } else {
     try {
-        // 本地端測試時使用實體檔案
         serviceAccount = require('./serviceAccountKey.json');
         console.log("✅ 成功讀取本地 serviceAccountKey.json 檔案");
     } catch (err) {
@@ -49,8 +37,8 @@ admin.initializeApp({
 });
 const db = admin.firestore();
 
-// --- 2. Middleware 設定 ---
-app.use(cors());
+// 4. 現在可以安全地使用 app 中介軟體（Middleware）了
+app.use(cors()); // <--- 現在 app 已經定義好了，不會再報錯！
 app.use(express.json());
 
 // --- 通用通知函數 ---
