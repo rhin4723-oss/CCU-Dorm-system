@@ -1,34 +1,26 @@
+const express = require('express'); // 1. Add this line to import Express
+const cors = require('cors');
 const admin = require('firebase-admin');
 
-console.log("=== SERVER STARTING ===");
-console.log("Checking for FIREBASE_KEY variable:", process.env.FIREBASE_KEY ? "FOUND IT!" : "MISSING!");
+const app = express(); // 2. Add this line to create the 'app' instance
 
+// Your existing Firebase initialization code...
 let serviceAccount;
-
 if (process.env.FIREBASE_KEY) {
-  try {
-    serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
-    console.log("Successfully parsed environment variable.");
-  } catch (error) {
-    console.error("Failed to parse FIREBASE_KEY! Make sure it is valid JSON in Railway:", error.message);
-    process.exit(1);
-  }
+    serviceAccount = JSON.parse(process.env.FIREBASE_KEY.trim());
 } else {
-  try {
     serviceAccount = require('./serviceAccountKey.json');
-  } catch (error) {
-    console.error("❌ 嚴重錯誤：找不到 serviceAccountKey.json 檔案！");
-    process.exit(1);
-  }
 }
 
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert(serviceAccount)
 });
 
-// --- 2. Middleware 設定 ---
+// 3. Now you can use app.use(cors()) safely
 app.use(cors());
 app.use(express.json());
+
+// Rest of your routes...
 
 // --- 通用通知函數 ---
 async function createNotification(receiver, type, titleKey, messageKey, params) {
