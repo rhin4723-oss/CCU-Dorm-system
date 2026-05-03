@@ -1,0 +1,1006 @@
+/* --- 基礎設定 --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: #f5f7fa;
+  color: #333333;
+  overflow-x: hidden;
+}
+
+/* --- 側邊欄 (Sidebar) --- */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: #2c3e50;
+  color: white;
+  padding: 20px;
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar.mobile-hidden {
+  transform: translateX(-100%);
+}
+
+.sidebar-logo {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 30px;
+  color: #4a90e2;
+  text-align: center;
+}
+
+.sidebar-menu-item {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
+.sidebar-menu-item:hover {
+  background: rgba(74, 144, 226, 0.2);
+}
+
+.sidebar-menu-item.active {
+  background: #e5e7eb;
+  color: #000000;
+}
+
+.sidebar-menu-item.active img {
+  filter: brightness(0) !important;
+}
+
+/* --- 主內容區 (Main Content) --- */
+.main-content {
+  margin-left: 280px;
+  min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+/* --- 導航列 (Top Nav) --- */
+.top-nav {
+  background: white;
+  padding: 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+/* --- 通知相關 --- */
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #d9534f;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  border: 2px solid white;
+}
+
+.notification-panel {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  left: auto;
+  transform: none;
+  width: 380px;
+  max-height: 500px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: none;
+  z-index: 9999;
+  border: 1px solid #f3f4f6;
+}
+
+.notification-panel.show {
+  display: block;
+  animation: slideDown 0.2s ease-out;
+}
+
+.notification-item {
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.notification-item:hover {
+  background: #f9fafb;
+}
+
+.notification-item.unread {
+  background: #eff6ff;
+}
+
+/* 通知單一刪除按鈕 (平常隱藏，游標滑過時顯示) */
+.notification-item .delete-btn {
+  display: none;
+  color: #ef4444;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.notification-item:hover .delete-btn {
+  display: block;
+}
+.notification-item .delete-btn:hover {
+  background-color: #fee2e2;
+}
+
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- 卡片與按鈕 --- */
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: "Poppins", sans-serif;
+}
+
+.btn-primary {
+  background: #4a90e2;
+  color: white;
+}
+.btn-primary:hover {
+  background: #357abd;
+}
+
+.btn-success {
+  background: #5cb85c;
+  color: white;
+}
+.btn-success:hover {
+  background: #4cae4c;
+}
+
+.btn-danger {
+  background: #d9534f;
+  color: white;
+}
+.btn-danger:hover {
+  background: #c9302c;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #333333;
+}
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+/* --- 表單 --- */
+.form-group {
+  margin-bottom: 20px;
+}
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333333;
+}
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: "Poppins", sans-serif;
+  transition: border-color 0.3s ease;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #4a90e2;
+}
+
+/* --- 狀態標籤 --- */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.status-approved {
+  background: #d4edda;
+  color: #155724;
+}
+.status-rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+.status-arrived {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+.status-collected {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* --- 表格 --- */
+.table-container {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  background: #f9fafb;
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #e5e7eb;
+}
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+tr:hover {
+  background: #f9fafb;
+}
+
+/* --- 漢堡選單 (全平台顯示) --- */
+.hamburger {
+  display: flex; /* 改為 flex 讓電腦版也能看見 */
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+/* --- 桌機版縮小側邊欄 (Mini Sidebar) --- */
+@media (min-width: 769px) {
+  /* 側邊欄變窄為 80px */
+  .sidebar.collapsed {
+    width: 80px;
+    transform: none; 
+  }
+  
+  /* 主內容區域只往左推 80px */
+  .main-content.expanded {
+    margin-left: 80px;
+  }
+  
+  /* 隱藏完整 Logo，換成縮寫 (例如: Dorm) */
+  .sidebar.collapsed .sidebar-logo span {
+    display: none;
+  }
+  .sidebar.collapsed .sidebar-logo::after {
+    content: "Dorm"; /* 你可以換成 "CCU" 或你喜歡的縮寫 */
+    font-size: 18px;
+  }
+
+  /* 隱藏所有的文字與紅底數字 Badge，只留下最前面的 Icon */
+  .sidebar.collapsed .sidebar-menu-item span:not(:first-child) {
+    display: none !important;
+  }
+
+  /* 隱藏 FUNCTIONS / 管理功能 的分類標題 */
+  .sidebar.collapsed div[data-i18n="functions"],
+  .sidebar.collapsed div[data-i18n="admin_functions"] {
+    display: none !important;
+  }
+
+  /* 讓剩下的 Icon 置中對齊 */
+  .sidebar.collapsed .sidebar-menu-item {
+    justify-content: center;
+    padding: 12px 0;
+  }
+}
+.hamburger span {
+  width: 24px;
+  height: 3px;
+  background: #333333;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* --- 登入頁面 --- */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2c3e50;
+  padding: 20px;
+}
+.login-container > div {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.login-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative; 
+}
+.login-welcome {
+  text-align: center;
+  margin-top: 20px;
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  backdrop-filter: blur(10px);
+  width: 100%;
+}
+
+/* --- FAQ --- */
+.faq-item {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 0;
+}
+.faq-question {
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.faq-answer {
+  margin-top: 12px;
+  color: #6b7280;
+  display: none;
+}
+.faq-answer.show {
+  display: block;
+}
+
+/* --- Loaders --- */
+.login-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 280px; 
+  width: calc(100% - 280px); 
+  height: 100%;
+  background: rgba(255, 255, 255, 0.85); 
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.login-loader.show,
+.page-loader.show {
+  display: flex;
+}
+
+/* 放大、加粗、黑色的新版動畫設定 */
+.login-loader-animation,
+.page-loader-animation {
+  width: 80px;
+  aspect-ratio: 1;
+  box-shadow: 0 0 0 8px #000000 inset;
+  border-radius: 50%;
+  position: relative;
+  animation: l11 10s infinite; 
+}
+.login-loader-animation:before,
+.login-loader-animation:after,
+.page-loader-animation:before,
+.page-loader-animation:after {
+  content: "";
+  position: absolute;
+  top: calc(100% + 8px); 
+  left: calc(50% - 20px); 
+  box-shadow: inherit;
+  width: 40px; 
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform-origin: 50% -48px; 
+  animation: l11 2.5s infinite; 
+}
+.login-loader-animation:after,
+.page-loader-animation:after {
+  animation-delay: -1.25s; 
+}
+@keyframes l11 {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- RWD 設定 --- */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.mobile-show {
+    transform: translateX(0);
+  }
+  .main-content {
+    margin-left: 0;
+  }
+  .hamburger {
+    display: flex;
+  }
+  .notification-panel {
+    width: calc(100vw - 48px);
+    right: 24px;
+    left: auto;
+    max-height: 80vh;
+  }
+  .page-loader {
+    left: 0;
+    width: 100%;
+  }
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+.overlay.show {
+  display: block;
+}
+
+/* Tailwind Reset */
+*,
+::before,
+::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+}
+::backdrop {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0;
+  --tw-translate-y: 0;
+  --tw-rotate: 0;
+  --tw-skew-x: 0;
+  --tw-skew-y: 0;
+  --tw-scale-x: 1;
+  --tw-scale-y: 1;
+  --tw-pan-x: ;
+  --tw-pan-y: ;
+  --tw-pinch-zoom: ;
+  --tw-scroll-snap-strictness: proximity;
+  --tw-gradient-from-position: ;
+  --tw-gradient-via-position: ;
+  --tw-gradient-to-position: ;
+  --tw-ordinal: ;
+  --tw-slashed-zero: ;
+  --tw-numeric-figure: ;
+  --tw-numeric-spacing: ;
+  --tw-numeric-fraction: ;
+  --tw-ring-inset: ;
+  --tw-ring-offset-width: 0px;
+  --tw-ring-offset-color: #fff;
+  --tw-ring-color: rgb(59 130 246 / 0.5);
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-shadow: 0 0 #0000;
+  --tw-shadow-colored: 0 0 #0000;
+}
+*,
+::after,
+::before {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: #e5e7eb;
+}
+::after,
+::before {
+  --tw-content: "";
+}
+:host,
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+}
+body {
+  margin: 0;
+  line-height: inherit;
+}
+hr {
+  height: 0;
+  color: inherit;
+  border-top-width: 1px;
+}
+abbr:where([title]) {
+  -webkit-text-decoration: underline dotted;
+  text-decoration: underline dotted;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+b,
+strong {
+  font-weight: bolder;
+}
+code,
+kbd,
+pre,
+samp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 1em;
+}
+small {
+  font-size: 80%;
+}
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sub {
+  bottom: -0.25em;
+}
+sup {
+  top: -0.5em;
+}
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+button,
+select {
+  text-transform: none;
+}
+button,
+input:where([type="button"]),
+input:where([type="reset"]),
+input:where([type="submit"]) {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+:-moz-focusring {
+  outline: auto;
+}
+:-moz-ui-invalid {
+  box-shadow: none;
+}
+progress {
+  vertical-align: baseline;
+}
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+[type="search"] {
+  -webkit-appearance: textfield;
+  appearance: textfield;
+  outline-offset: -2px;
+}
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  appearance: button;
+  font: inherit;
+}
+summary {
+  display: list-item;
+}
+blockquote,
+dd,
+dl,
+figure,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+p,
+pre {
+  margin: 0;
+}
+fieldset {
+  margin: 0;
+  padding: 0;
+}
+legend {
+  padding: 0;
+}
+menu,
+ol,
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+dialog {
+  padding: 0;
+}
+textarea {
+  resize: vertical;
+}
+input::placeholder,
+textarea::placeholder {
+  opacity: 1;
+  color: #9ca3af;
+}
+[role="button"],
+button {
+  cursor: pointer;
+}
+:disabled {
+  cursor: default;
+}
+audio,
+canvas,
+embed,
+iframe,
+img,
+object,
+svg,
+video {
+  display: block;
+}
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none;
+}
+
+/* =========================================
+   Dark Mode (深色模式) 樣式覆蓋
+========================================= */
+body.dark-mode {
+  background: #111827 !important; /* 更深的背景色 */
+  color: #e5e7eb !important;
+}
+
+/* 卡片、導航列、彈窗、登入白格變深色 */
+body.dark-mode .card,
+body.dark-mode .top-nav,
+body.dark-mode .notification-panel,
+body.dark-mode .modal-content,
+body.dark-mode .login-card {
+  background: #1f2937 !important;
+  color: #e5e7eb !important;
+  border-color: #374151 !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 針對寫死背景色的區塊 (加入了包裹詢問的 background: white) */
+body.dark-mode label[style*="background: white"],
+body.dark-mode div[style*="background: white"],
+body.dark-mode div[style*="background: #f8fafc"],
+body.dark-mode div[style*="background: #eff6ff"],
+body.dark-mode div[style*="background: #fef3c7"],
+body.dark-mode div[style*="background: #d1fae5"] {
+  background: #374151 !important;
+  color: #e5e7eb !important;
+  border-color: #4b5563 !important;
+}
+
+/* 輸入框 */
+body.dark-mode .form-input,
+body.dark-mode select.form-input {
+  background-color: #374151 !important;
+  color: #e5e7eb !important;
+  border-color: #4b5563 !important;
+}
+body.dark-mode .form-input::placeholder {
+  color: #9ca3af !important;
+}
+body.dark-mode .form-input:focus {
+  border-color: #60a5fa !important;
+}
+
+/* 標籤與特定文字顏色覆蓋 (修正深色模式下的灰色和深色文字) */
+body.dark-mode .form-label,
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, body.dark-mode h4,
+body.dark-mode span[style*="color: #334155"],
+body.dark-mode span[style*="color: #2c3e50"],
+body.dark-mode p[style*="color: #4b5563"],
+body.dark-mode p[style*="color: #64748b"],
+body.dark-mode div[style*="color: #1e293b"],
+body.dark-mode div[style*="color: #333"] {
+  color: #f3f4f6 !important;
+}
+
+/* 將部分說明文字調亮 */
+body.dark-mode div[style*="color: #6b7280"],
+body.dark-mode div[style*="color: #9ca3af"],
+body.dark-mode div[style*="color: #475569"],
+body.dark-mode span[style*="color: #64748b"],
+body.dark-mode div[style*="color: #64748b"] {
+  color: #d1d5db !important;
+}
+
+/* 讓單號的藍色在深色模式更亮、更清楚 */
+body.dark-mode span[style*="color:#2563eb"],
+body.dark-mode span[style*="color: #2563eb"] {
+  color: #93c5fd !important;
+}
+
+/* 針對分隔線顏色修正 */
+body.dark-mode hr[style*="border-top: 1px dashed #cbd5e1"] {
+  border-color: #4b5563 !important;
+}
+
+/* 按鈕 (Secondary) */
+body.dark-mode .btn-secondary {
+  background-color: #374151 !important;
+  color: #e5e7eb !important;
+}
+body.dark-mode .btn-secondary:hover {
+  background-color: #4b5563 !important;
+}
+
+/* 表格與列表 */
+body.dark-mode th {
+  background: #374151 !important;
+  border-bottom-color: #4b5563 !important;
+  color: #e5e7eb !important;
+}
+body.dark-mode td {
+  border-bottom-color: #374151 !important;
+}
+body.dark-mode tr:hover {
+  background: #4b5563 !important;
+}
+
+/* 登入頁的學生/管理員切換底線 */
+body.dark-mode #loginTabs {
+  border-bottom-color: #4b5563 !important;
+}
+
+/* 分頁按鈕 */
+body.dark-mode .page-item {
+  color: #e5e7eb !important;
+}
+body.dark-mode .page-item:hover:not(.disabled):not(.active) {
+  background-color: #4b5563 !important;
+}
+
+/* 載入畫面半透明遮罩 */
+body.dark-mode .page-loader {
+  background: rgba(17, 24, 39, 0.85) !important;
+}
+body.dark-mode .login-loader-animation,
+body.dark-mode .page-loader-animation {
+  box-shadow: 0 0 0 8px #e5e7eb inset !important;
+}
+/* 讓深色模式下的切換圖示變成白色 */
+body.dark-mode .theme-icon {
+  filter: brightness(0) invert(1);
+}
+/* 讓通知鈴鐺在深色模式變成白色 */
+body.dark-mode #topNavNotificationBtn img {
+  filter: brightness(0) invert(1);
+}
+/* 修正未讀通知的背景色，讓白色字體能清楚顯示 */
+body.dark-mode .notification-item.unread {
+  background-color: #374151 !important; /* 深灰色，與面板底色做區隔 */
+}
+
+/* 修正已讀通知游標滑過去 (hover) 時的背景色 */
+body.dark-mode .notification-item:hover {
+  background-color: #4b5563 !important; /* 稍微亮一點的深灰色 */
+}
+/* 深色模式下的單一刪除按鈕 hover 色 */
+body.dark-mode .notification-item .delete-btn:hover {
+  background-color: #7f1d1d;
+}
+/* 讓全部刪除的垃圾桶在深色模式反轉成白色 */
+body.dark-mode #deleteAllIcon {
+  filter: brightness(0) invert(1);
+}
+/* 讓密碼顯示的眼睛圖示在深色模式下變成白色 (包含登入頁、設定頁、強制修改密碼彈窗) */
+body.dark-mode #loginPwdIcon img,
+body.dark-mode #adminSecretIcon img,
+body.dark-mode #currentPwdIcon img,
+body.dark-mode #newPwdIcon img,
+body.dark-mode #confirmPwdIcon img,
+body.dark-mode #forceNewPwdIcon img,
+body.dark-mode #forceConfirmPwdIcon img {
+  filter: brightness(0) invert(1);
+  opacity: 0.8 !important; /* 在深色模式稍微調亮一點會更清楚 */
+}
+
+/* =========================================
+   針對「批量登記包裹」、「寄件資訊」與「報修預覽」的深色模式修正
+========================================= */
+
+body.dark-mode form[style*="background: #f0fdf4"],
+body.dark-mode div[style*="background: #f0fdf4"],
+body.dark-mode div[style*="background: #eff6ff"],
+body.dark-mode div[style*="background: #fafafa"],
+body.dark-mode #batchPackageListContainer,
+body.dark-mode #addressGuideContent {   
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+}
+
+body.dark-mode h2[style*="color: #166534"],
+body.dark-mode h3[style*="color: #166534"],
+body.dark-mode p[style*="color: #15803d"],
+body.dark-mode label[style*="color: #166534"] {
+    color: #a7f3d0 !important;
+}
+
+body.dark-mode h3[style*="color: #1e3a8a"] {
+    color: #93c5fd !important; /* 轉淺藍色 */
+}
+body.dark-mode ul[style*="color: #334155"],
+body.dark-mode p[style*="color: #475569"] {
+    color: #e5e7eb !important; /* 轉淺灰色 */
+}
+
+/* =========================================
+   洗/烘衣機運轉中的動態點點 (laundry-loader)
+========================================= */
+.laundry-loader {
+  height: 14px; /* 稍微縮小，配合 14px 的字體 */
+  aspect-ratio: 2.5;
+  /* 使用 currentColor 讓點點顏色自動跟隨文字（深色模式會自動變白/淺灰） */
+  --_g: no-repeat radial-gradient(farthest-side, currentColor 90%, #0000);
+  background: var(--_g), var(--_g), var(--_g), var(--_g);
+  background-size: 20% 50%;
+  animation: l43 1s infinite linear; 
+}
+
+@keyframes l43 {
+  0%     {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 50% ,calc(2*100%/3) 50% ,calc(3*100%/3) 50% }
+  16.67% {background-position: calc(0*100%/3) 0   ,calc(1*100%/3) 50% ,calc(2*100%/3) 50% ,calc(3*100%/3) 50% }
+  33.33% {background-position: calc(0*100%/3) 100%,calc(1*100%/3) 0   ,calc(2*100%/3) 50% ,calc(3*100%/3) 50% }
+  50%    {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 100%,calc(2*100%/3) 0   ,calc(3*100%/3) 50% }
+  66.67% {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 50% ,calc(2*100%/3) 100%,calc(3*100%/3) 0   }
+  83.33% {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 50% ,calc(2*100%/3) 50% ,calc(3*100%/3) 100%}
+  100%   {background-position: calc(0*100%/3) 50% ,calc(1*100%/3) 50% ,calc(2*100%/3) 50% ,calc(3*100%/3) 50% }
+}
+/* 讓漢堡選單的三條槓在深色模式下變成淺色 */
+body.dark-mode .hamburger span {
+  background: #e5e7eb !important;
+}
+/* 當側邊欄為縮小模式 (Mini Sidebar) 時，動態調整 Loading 遮罩的範圍 */
+body:has(.sidebar.collapsed) .page-loader {
+  left: 80px;
+  width: calc(100% - 80px);
+}

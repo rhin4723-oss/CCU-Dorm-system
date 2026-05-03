@@ -1,0 +1,15 @@
+# Sensitive keys and credentials
+serviceAccountKey.json
+.env
+
+# Dependencies
+node_modules/
+
+# Editor specific settings
+.vscode/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+serviceAccountKey.json

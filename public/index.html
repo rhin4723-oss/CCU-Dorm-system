@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dormitory Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/i18next@25.8.13/i18next.min.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* Modal 樣式 */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(44, 62, 80, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(2px);
+      }
+      .modal-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      /* 分頁按鈕樣式 */
+      .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        margin-top: 24px;
+      }
+      .page-item {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 6px;
+        border-radius: 16px;
+        font-size: 14px;
+        color: #374151;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s, color 0.2s;
+      }
+      .page-item:hover:not(.disabled):not(.active) {
+        background-color: #e5e7eb;
+      }
+      .page-item.active {
+        background-color: #3b82f6;
+        color: white;
+      }
+      .page-item.disabled {
+        color: #9ca3af;
+        cursor: not-allowed;
+      }
+
+      /* 報修標籤樣式 */
+      .repair-type-badge {
+        background: #e2e8f0;
+        color: #334155;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+        display: inline-block;
+      }
+      /* === 公告系統專用樣式 === */
+      
+      /* 公告列表的分隔線與文字顏色適應 */
+      .announcement-item {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 12px 0;
+        display: flex;
+        align-items: center;
+      }
+      .dark-mode .announcement-item {
+        border-bottom: 1px solid #334155;
+      }
+      .announcement-item a {
+        color: #4a90e2;
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: 500;
+        transition: color 0.2s;
+      }
+      .announcement-item a:hover {
+        color: #93c5fd;
+      }
+
+      /* 🔥 魔法：強制洗掉爬蟲抓回來的學校 inline style，完美支援深色模式 */
+      .dark-mode .announcement-content * {
+        color: #e2e8f0 !important;
+        background-color: transparent !important;
+      }
+    </style>
+  </head>
+
+  <body data-editor-root="true">
+    <div id="app">
+      <div id="loginPage" class="login-container">
+        <div>
+          <h1 style="text-align: center; margin-bottom: 30px; color: white; font-size: 36px; font-weight: 700;">
+            <span data-i18n="title"></span>
+          </h1>
+          <div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px; background: rgba(255,255,255,0.9); border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;" onclick="toggleTheme()">
+              <img class="theme-icon" src="./images/darkmode.png" style="width: 20px; height: 20px;" alt="切換主題" />
+            </button>
+
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px; background: rgba(255,255,255,0.9); border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="changeLanguage('en')">EN</button>
+              <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px; background: rgba(255,255,255,0.9); border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="changeLanguage('zh')">中文</button>
+            </div>
+          </div>
+
+          <div class="login-card">
+            <div id="loginTabs" style="display: flex; justify-content: space-around; margin-bottom: 24px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+              <div id="tabStudent" onclick="switchLoginTab('student')" style="cursor: pointer; color: #4a90e2; font-weight: bold; font-size: 20px;">
+                <span data-i18n="student"></span>
+              </div>
+              <div id="tabAdmin" onclick="switchLoginTab('admin')" style="cursor: pointer; color: #ccc; font-size: 20px;">
+                <span data-i18n="admin"></span>
+              </div>
+            </div>
+
+            <h3 id="authTitle" data-i18n="login_student_title" style="text-align: center; margin-bottom: 20px; font-weight: 600;">Student Login</h3>
+
+            <form id="loginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
+              <div class="form-group" id="loginAccountGroup">
+                <label class="form-label" id="accountLabel"><span data-i18n="student_id"></span></label>
+                <input type="text" class="form-input" id="loginAccount" required placeholder="Enter your Student ID" data-i18n-placeholder="enter_student_id" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label"><span data-i18n="password"></span></label>
+                <div style="position: relative; width: 100%">
+                  <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" data-i18n-placeholder="enter_password" required style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+                  <span id="loginPwdIcon" onclick="togglePasswordVisibility('loginPassword', 'loginPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
+                    <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                  </span>
+                </div>
+              </div>
+
+              <div id="registerOnlyFields" style="display: none">
+                <div class="form-group">
+                  <label class="form-label"><span data-i18n="admin_name"></span></label>
+                  <input type="text" class="form-input" id="adminName" placeholder="Enter admin name" data-i18n-placeholder="enter_admin_name" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label"><span data-i18n="admin_secret_key"></span></label>
+                  <div style="position: relative; width: 100%">
+                    <input type="password" class="form-input" id="adminSecret" placeholder="Required for admin registration" data-i18n-placeholder="req_admin_reg" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+                    <span id="adminSecretIcon" onclick="togglePasswordVisibility('adminSecret', 'adminSecretIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
+                      <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" id="authButton" class="btn btn-primary" style="width: 100%; margin-top: 20px" data-i18n="login_btn">Login</button>
+              
+              <div id="forgotPwdContainer" style="text-align: center; margin-top: 12px;">
+                <a href="#" onclick="showForgotPasswordAlert(event)" style="font-size: 14px; color: #4a90e2; text-decoration: underline; font-weight: 500;" data-i18n="forgot_password">Forgot Password?</a>
+              </div>
+            </form>
+
+            <div id="authSwitchContainer" style="text-align: center; margin-top: 16px; font-size: 14px; display: none;">
+              <span id="authSwitchText" data-i18n="no_admin_account">No admin account? </span>
+              <span onclick="toggleAuthMode()" id="authSwitchLink" data-i18n="signup_btn" style="color: #4a90e2; cursor: pointer; font-weight: 600; text-decoration: underline;">Sign up</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="customAlertModal" class="modal-overlay" style="z-index: 10500;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+          <h2 id="customAlertTitle" style="color: #4a90e2; margin-bottom: 16px; font-size: 22px; font-weight: bold;" data-i18n="sys_notice">系統通知</h2>
+          <p id="customAlertMessage" style="margin-bottom: 24px; color: #64748b; font-size: 16px; line-height: 1.6; white-space: pre-wrap;"></p>
+          <button class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 16px;" onclick="window._customAlertResolve()"><span data-i18n="btn_ok">OK</span></button>
+        </div>
+      </div>
+
+      <div id="customConfirmModal" class="modal-overlay" style="z-index: 10500;">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+          <h2 id="customConfirmTitle" style="color: #f59e0b; margin-bottom: 16px; font-size: 22px; font-weight: bold;" data-i18n="sys_confirm">確認操作</h2>
+          <p id="customConfirmMessage" style="margin-bottom: 24px; color: #64748b; font-size: 16px; line-height: 1.6; white-space: pre-wrap;"></p>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" style="flex: 1; padding: 12px; font-size: 16px;" onclick="window._customConfirmResolve(false)"><span data-i18n="btn_cancel">Cancel</span></button>
+            <button class="btn btn-primary" style="flex: 1; padding: 12px; font-size: 16px;" onclick="window._customConfirmResolve(true)"><span data-i18n="btn_ok">OK</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div id="forceChangePasswordModal" class="modal-overlay">
+        <div class="modal-content">
+          <h2 style="color: #e11d48; margin-bottom: 16px; text-align: center"><span data-i18n="action_required"></span></h2>
+          <p style="margin-bottom: 20px; color: #2c3e50" data-i18n="force_pwd_desc">For security reasons, Please set a new password before continuing.</p>
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="new_password"></span></label>
+            <div style="position: relative; width: 100%">
+              <input type="password" id="forceNewPassword" class="form-input" required minlength="6" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+              <span id="forceNewPwdIcon" onclick="togglePasswordVisibility('forceNewPassword', 'forceNewPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
+                <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+              </span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="confirm_password"></span></label>
+            <div style="position: relative; width: 100%">
+              <input type="password" id="forceConfirmPassword" class="form-input" required minlength="6" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+              <span id="forceConfirmPwdIcon" onclick="togglePasswordVisibility('forceConfirmPassword', 'forceConfirmPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
+                <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+              </span>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width: 100%" onclick="submitForceChangePassword()" data-i18n="btn_update_password">Update Password</button>
+        </div>
+      </div>
+
+      <div id="repairConfirmModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 650px; width: 95%;">
+          <h2 style="color: #4a90e2; margin-bottom: 16px; text-align: center; font-size: 24px; font-weight: bold;" id="repairConfirmTitle" data-i18n="repair_confirm_title">確認報修資料</h2>
+          <div id="repairConfirmData" style="font-size: 16px; line-height: 1.8; margin-bottom: 20px; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;"></div>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" style="flex: 1; padding: 12px;" onclick="closeRepairConfirmModal()" data-i18n="btn_cancel">取消</button>
+            <button class="btn btn-primary" style="flex: 1; padding: 12px;" onclick="submitRepairRequest()" data-i18n="btn_submit_repair">確認送出</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="inquiryModal" class="modal-overlay">
+        <div class="modal-content">
+          <h2 style="color: #4a90e2; margin-bottom: 16px; text-align: center"><span data-i18n="inquiry_modal_title">Send Inquiry</span></h2>
+          <p style="margin-bottom: 20px; color: #64748b; font-size: 14px;" data-i18n="inquiry_desc">If your shopping app says delivered but you have no notification here, submit an inquiry to the admin.</p>
+          <form onsubmit="submitInquiry(event)">
+            <div class="form-group">
+              <label class="form-label"><span data-i18n="tracking_number"></span></label>
+              <input type="text" id="inquiryTracking" class="form-input" required data-i18n-placeholder="enter_tracking" />
+            </div>
+            <div class="form-group">
+              <label class="form-label"><span data-i18n="courier_company"></span></label>
+              <select class="form-input" id="inquiryCourier" required>
+                <option value=""><span data-i18n="select_company"></span></option>
+                <option value="T-Cat"><span data-i18n="t_cat"></span></option>
+                <option value="Taiwan Pelican Express"><span data-i18n="pelican"></span></option>
+                <option value="Hsinchu Logistics"><span data-i18n="hsinchu"></span></option>
+                <option value="Kerry TJ Logistics"><span data-i18n="kerry"></span></option>
+                <option value="Chunghwa Post"><span data-i18n="post"></span></option>
+                <option value="Shopee Express">蝦皮店到店 / Shopee</option>
+                <option value="Other"><span data-i18n="other"></span></option>
+              </select>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+              <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeInquiryModal()" data-i18n="btn_cancel">Cancel</button>
+              <button type="submit" class="btn btn-primary" style="flex: 1;" id="inquirySubmitBtn" data-i18n="inquiry_submit">Submit</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div id="announcementDetailModal" class="modal-overlay">
+  <div class="modal-content" style="max-width: 800px; width: 95%;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
+      <h2 id="detailModalTitle" style="color: #4a90e2; font-size: 22px; font-weight: bold; margin: 0; line-height: 1.4;">載入中...</h2>
+      <button onclick="closeAnnouncementDetailModal()" style="background: none; border: none; font-size: 28px; cursor: pointer; color: #94a3b8; line-height: 1; padding: 0 0 0 16px;">&times;</button>
+    </div>
+    <div id="detailModalBody" class="announcement-content" style="font-size: 16px; line-height: 1.8; overflow-x: auto; max-height: 60vh; padding-right: 8px;">
+      <div style="text-align:center; padding: 40px; color: #94a3b8;">讀取資料中，請稍候...</div>
+    </div>
+    <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+      <a id="detailModalOriginalLink" href="#" target="_blank" style="color: #4a90e2; text-decoration: none; font-weight: 600; font-size: 15px; transition: color 0.2s; display: none;" onmouseover="this.style.textDecoration='underline'; this.style.color='#93c5fd'" onmouseout="this.style.textDecoration='none'; this.style.color='#4a90e2'">
+        🔗 <span data-i18n="original_link">原網站連結(點擊)</span>
+      </a>
+      <button class="btn btn-secondary" onclick="closeAnnouncementDetailModal()" data-i18n="btn_cancel">關閉</button>
+    </div>
+  </div>
+</div>
+      
+      <div id="batchRegisterModal" class="modal-overlay">
+        <div class="modal-content" style="width: 95%; max-width: 850px;">
+          <h2 style="color: #166534; margin-bottom: 16px; text-align: center; font-size: 24px; font-weight: bold;">批量登記包裹</h2>
+          <p style="margin-bottom: 16px; color: #15803d; font-size: 14px;">請連續輸入資訊並「加入清單」，最後點擊送出即可一次過完成登記與通知。</p>
+          
+          <form onsubmit="addPackageToBatchList(event)" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 20px; background: #f0fdf4; padding: 16px; border-radius: 8px; border: 1px solid #bbf7d0;">
+            <div style="flex: 1; min-width: 80px;">
+              <label class="form-label" style="font-size: 12px; color: #166534; font-weight: 600;">房號</label>
+              <input type="text" class="form-input" id="batchRoom" required placeholder="如: 1216" style="padding: 8px;" />
+            </div>
+            <div style="flex: 1; min-width: 60px;">
+              <label class="form-label" style="font-size: 12px; color: #166534; font-weight: 600;">床位</label>
+              <input type="text" class="form-input" id="batchBed" required placeholder="如: A" style="padding: 8px;" />
+            </div>
+            <div style="flex: 2; min-width: 140px;">
+              <label class="form-label" style="font-size: 12px; color: #166534; font-weight: 600;">物流單號</label>
+              <input type="text" class="form-input" id="batchTracking" required placeholder="請刷條碼或輸入單號" style="padding: 8px;" />
+            </div>
+            <div style="flex: 1; min-width: 120px;">
+              <label class="form-label" style="font-size: 12px; color: #166534; font-weight: 600;">物流公司</label>
+              <select class="form-input" id="batchCourier" required style="padding: 8px;">
+                <option value="T-Cat">黑貓宅急便</option>
+                <option value="Taiwan Pelican Express">台灣宅配通</option>
+                <option value="Hsinchu Logistics">新竹物流</option>
+                <option value="Kerry TJ Logistics">嘉里大榮物流</option>
+                <option value="Chunghwa Post">中華郵政</option>
+                <option value="Shopee Express">蝦皮店到店</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" style="white-space: nowrap; padding: 10px 16px; height: 40px; background-color: #059669; border: none;">加入清單</button>
+          </form>
+
+          <div style="max-height: 250px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; background: #fafafa;" id="batchPackageListContainer">
+            <p style="text-align: center; color: #9ca3af; font-size: 14px; margin: 10px 0;">目前無暫存包裹</p>
+          </div>
+
+          <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="closeBatchRegisterModal()">取消</button>
+            <button class="btn btn-success" style="flex: 2; background-color: #16a34a; border: none; font-weight: bold;" onclick="submitBatchPackages()" id="submitBatchBtn" disabled>確認並送出全部 (0)</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="rejectFacilityModal" class="modal-overlay">
+        <div class="modal-content">
+          <h2 style="color: #e11d48; margin-bottom: 16px; text-align: center" data-i18n="reject_title">拒絕申請原因</h2>
+          <form onsubmit="submitRejectFacility(event)">
+            <div class="form-group">
+              <label class="form-label" data-i18n="reject_select_reason">請選擇拒絕原因</label>
+              <select class="form-input" id="rejectFacilityReason" onchange="toggleRejectReason()" required>
+                <option value="" data-i18n="reject_placeholder">請選擇...</option>
+                <option value="已租借給其他單位" data-i18n="reject_rented">已租借給其他單位</option>
+                <option value="場地維修" data-i18n="reject_maintenance">場地維修</option>
+                <option value="場地不開放" data-i18n="reject_closed">場地不開放</option>
+                <option value="其他" data-i18n="reject_other">其他</option>
+              </select>
+            </div>
+            <div class="form-group" id="otherRejectReasonGroup" style="display: none;">
+              <label class="form-label" data-i18n="reject_other_label">其他原因</label>
+              <input type="text" class="form-input" id="rejectFacilityOtherReason" data-i18n-placeholder="reject_other_label" />
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+              <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeRejectFacilityModal()" data-i18n="btn_cancel">取消</button>
+              <button type="submit" class="btn btn-danger" style="flex: 1;" data-i18n="btn_confirm_reject">確認拒絕</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="login-loader" id="loginLoader">
+        <div class="login-loader-animation"></div>
+      </div>
+      <div class="page-loader" id="pageLoader">
+        <div class="page-loader-animation"></div>
+      </div>
+
+      <div id="mainApp" style="display: none">
+        <div class="sidebar" id="sidebar">
+          <div class="sidebar-logo"><span data-i18n="dorm_system"></span></div>
+          <div class="student-only" data-i18n="functions" style="color: #9ca3af; font-size: 12px; font-weight: 600; padding: 12px 16px; margin-top: 20px; margin-bottom: 8px;">FUNCTIONS</div>
+          
+          <div id="nav-dashboard" class="sidebar-menu-item student-only" onclick="showPage('dashboard', event)">
+            <span><img src="./images/home.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="home"></span>
+          </div>
+          <div id="nav-packageUser" class="sidebar-menu-item student-only" onclick="showPage('packageUser', event)">
+            <span><img src="./images/package.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="packages"></span>
+          </div>
+          <div id="nav-laundryUser" class="sidebar-menu-item student-only" onclick="showPage('laundryUser', event)">
+            <span><img src="./images/washdry.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="nav_laundry">洗/烘衣機狀態</span>
+          </div>
+          <div id="nav-repairUser" class="sidebar-menu-item student-only" onclick="showPage('repairUser', event)">
+            <span><img src="./images/fix.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="nav_repair">損壞報修</span>
+          </div>
+          <div id="nav-facilityUser" class="sidebar-menu-item student-only" onclick="showPage('facilityUser', event)">
+            <span><img src="./images/rental.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="facility_rental">場地租借</span>
+          </div>
+          <div id="nav-faq" class="sidebar-menu-item student-only" onclick="showPage('faq', event)">
+            <span><img src="./images/faq.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="faq"></span>
+          </div>
+
+          <div class="admin-only" data-i18n="admin_functions" style="display: none; color: #9ca3af; font-size: 12px; font-weight: 600; padding: 12px 16px; margin-top: 20px; margin-bottom: 8px;">管理功能</div>
+
+          <div class="sidebar-menu-item admin-only" id="nav-packageAdmin" style="display: none; margin-top: 10px" onclick="showPage('packageAdmin', event)">
+            <span><img src="./images/package.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span>包裹管理</span>
+            <span id="adminPackageBadge" style="display: none; margin-left: auto; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0</span>
+          </div>
+          <div class="sidebar-menu-item admin-only" id="nav-repairAdmin" style="display: none" onclick="showPage('repairAdmin', event)">
+            <span><img src="./images/fix.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="nav_repair_admin">損壞報修管理</span>
+            <span id="adminRepairBadge" style="display: none; margin-left: auto; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0</span>
+          </div>
+          <div class="sidebar-menu-item admin-only" id="nav-facilityAdmin" style="display: none" onclick="showPage('facilityAdmin', event)">
+            <span><img src="./images/rental.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span>場地租借</span>
+            <span id="adminFacilityBadge" style="display: none; margin-left: auto; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0</span>
+          </div>
+          <div class="sidebar-menu-item admin-only" id="nav-studentAccountAdmin" style="display: none" onclick="showPage('studentAccountAdmin', event)">
+            <span><img src="./images/admin.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span>學生帳號</span>
+            <span id="adminStudentAccountBadge" style="display: none; margin-left: auto; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0</span>
+          </div>
+          <div class="sidebar-menu-item admin-only" id="nav-annAdmin" style="display: none" onclick="showPage('annAdmin', event)">
+  <span><img src="./images/announcement.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+  <span>公告管理</span>
+</div>
+
+          <div style="flex: 1"></div>
+          
+          <div id="nav-settings" class="sidebar-menu-item student-only" onclick="showPage('settings', event)">
+            <span><img src="./images/settings.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="settings"></span>
+          </div>
+          <div class="sidebar-menu-item" onclick="logout()">
+            <span><img src="./images/logout.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span data-i18n="logout"></span>
+          </div>
+        </div>
+
+        <div class="main-content" id="mainContent">
+          <div class="top-nav">
+            <div style="display: flex; align-items: center; gap: 16px">
+              <div class="hamburger" onclick="toggleSidebar()">
+                <span></span><span></span><span></span>
+              </div>
+              
+              <div id="langToggle" style="display: flex; gap: 8px">
+                <button class="btn btn-secondary" onclick="changeLanguage('en')">EN</button>
+                <button class="btn btn-secondary" onclick="changeLanguage('zh')">中文</button>
+              </div>
+              
+              <h2 id="pageTitle" style="font-size: 20px; font-weight: 600; border-left: 2px solid #e5e7eb; padding-left: 16px;" data-i18n="home">Dashboard</h2>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
+              <div style="position: relative">
+                <button class="btn btn-secondary" id="topNavNotificationBtn" style="padding: 10px 16px; position: relative; height: 46px; display: flex; align-items: center; justify-content: center;" onclick="toggleNotifications()">
+                  <img src="./images/notifications.png" style="width: 20px; height: 20px; object-fit: contain" alt="Notifications" />
+                  <span class="notification-badge" id="notificationBadge">0</span>
+                </button>
+                <div class="notification-panel" id="notificationPanel">
+                  <div style="padding: 16px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-weight: 600"><span data-i18n="notifications"></span></h3>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px" onclick="markAllRead()"><span data-i18n="mark_as_read">Mark As Read</span></button>
+                      <button class="btn btn-secondary" style="padding: 4px 8px; display: flex; align-items: center;" onclick="clearAllNotifications()" title="Delete All Notifications">
+                        <img src="./images/delete.png" style="width: 14px; height: 14px; opacity: 0.8;" alt="Delete All" id="deleteAllIcon" />
+                      </button>
+                    </div>
+                  </div>
+                  <div style="max-height: 400px; overflow-y: auto; padding-bottom: 16px;" id="notificationList"></div>
+                </div>
+              </div>
+
+              <button class="btn btn-secondary" onclick="toggleTheme()" style="padding: 10px 16px; font-size: 18px; height: 46px; display: flex; align-items: center; justify-content: center;">
+                <img class="theme-icon" src="./images/darkmode.png" style="width: 24px; height: 24px;" alt="切換主題" />
+              </button>
+            </div>
+          </div>
+
+          <div style="padding: 24px">
+            
+            <div id="annAdminPage" class="page-content" style="display: none">
+              <div class="card">
+                <h3 style="margin-bottom: 16px; color: #1c7db9; font-size: 24px; font-weight: bold;">發布內部公告通知</h3>
+                <p style="color: #666; margin-bottom: 20px;">此處發布的公告會顯示在學生首頁的最上方（紅框區塊）。</p>
+                
+                <form id="internalAnnouncementForm" onsubmit="publishInternalAnnouncement(event)">
+                  <div class="form-group">
+                    <label class="form-label">公告標題</label>
+                    <input type="text" id="annTitle" class="form-input" required placeholder="例如：4/22 宿舍停水通知" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">公告詳細內容</label>
+                    <textarea id="annContent" class="form-input" rows="4" required placeholder="請輸入詳細說明..."></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">上傳圖片或附件 (選填)</label>
+                    <input type="file" id="annFile" class="form-input" accept="image/*,.pdf,.doc,.docx" />
+                  </div>
+                  <button type="submit" id="annSubmitBtn" class="btn btn-danger" style="width: 100%; font-weight: bold;">發布公告通知</button>
+                </form>
+              </div>
+
+              <div class="card">
+                <h3 style="margin-bottom: 16px; font-size: 20px; font-weight: bold;">歷史公告紀錄</h3>
+                <div id="adminAnnHistory"></div>
+              </div>
+            </div>
+
+            <div id="dashboardPage" class="page-content">
+              <div class="card">
+                <h2 style="margin-bottom: 16px; font-size: 28px">
+                  <span data-i18n="welcome"></span>, <span id="userName">User</span>!
+                </h2>
+                <p style="color: #6b7280; font-size: 18px">
+                  <span data-i18n="room_label"></span>: <span id="userRoom">N/A</span> |
+                  <span data-i18n="bed_label"></span>: <span id="userBed">N/A</span>
+                </p>
+              </div>
+              <div class="grid grid-cols-1 lg:grid-cols-3" style="gap: 24px;">
+                
+                <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="showPage('packageUser')">
+                  <div style="margin-bottom: 12px">
+                    <img src="./images/packagesHOME.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                  </div>
+                  <h3 style="margin-bottom: 8px"><span data-i18n="active_packages"></span></h3>
+                  <p style="font-size: 32px; font-weight: 700; margin: 0;" id="activePackageCount">0</p>
+                </div>
+                
+                <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="toggleNotifications()">
+                  <div style="margin-bottom: 12px">
+                    <img src="./images/notificationHOME.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                  </div>
+                  <h3 style="margin-bottom: 8px"><span data-i18n="notifications"></span></h3>
+                  <p style="font-size: 32px; font-weight: 700; margin: 0;" id="unreadCount">0</p>
+                </div>
+                
+                <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="showPage('faq')">
+                  <div style="margin-bottom: 12px">
+                    <img src="./images/faq.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                  </div>
+                  <h3 style="margin-bottom: 8px"><span data-i18n="faq"></span></h3>
+                  <p style="font-size: 16px; margin: 0;"><span data-i18n="get_help"></span></p>
+                </div>
+
+                <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="showPage('repairUser')">
+                  <div style="margin-bottom: 12px">
+                    <img src="./images/fix.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                  </div>
+                  <h3 style="margin-bottom: 8px"><span data-i18n="nav_repair"></span></h3>
+                  <p style="font-size: 32px; font-weight: 700; color: white; margin: 0; display: flex; align-items: baseline; gap: 8px;">
+                    <span style="font-size: 16px; font-weight: 400; opacity: 0.9;" data-i18n="pending_count"></span>
+                    <span id="repairPendingCount">0</span>
+                  </p>
+                </div>
+
+                <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="showPage('facilityUser')">
+                  <div style="margin-bottom: 12px">
+                    <img src="./images/rental.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                  </div>
+                  <h3 style="margin-bottom: 8px"><span data-i18n="facility_rental"></span></h3>
+                  <p style="font-size: 32px; font-weight: 700; color: white; margin: 0; display: flex; align-items: baseline; gap: 8px;">
+                    <span style="font-size: 16px; font-weight: 400; opacity: 0.9;" data-i18n="pending_count"></span>
+                    <span id="facilityPendingCount">0</span>
+                  </p>
+                </div>
+
+                <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="openAIAssistant()">
+                  <div style="margin-bottom: 12px">
+                    <img src="./images/robot.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                  </div>
+                  <h3 style="margin-bottom: 8px"><span data-i18n="ai_assistant"></span></h3>
+                  <p style="font-size: 16px; color: white; margin: 0;"><span data-i18n="ai_assistant_desc"></span></p>
+                </div>
+              </div>
+              <div id="internalAnnouncementSection" class="card" style="margin-top: 24px; display: none;">
+  <h3 style="margin-bottom: 16px; color: #4a90e2; font-size: 24px; font-weight: bold;">
+    🔔 <span data-i18n="internal_announcements_title">重要公告通知</span>
+  </h3>
+  <div id="internalAnnouncementList"></div>
+</div>
+
+<div id="announcementSection" class="card" style="margin-top: 24px;">
+  <h3 style="margin-bottom: 16px; color: #4a90e2; font-size: 24px; font-weight: bold;">
+    📢 <span data-i18n="announcements_title">宿舍最新公告</span>
+  </h3>
+  <div id="announcementList">
+    <span data-i18n="loading_announcements">載入中...</span>
+  </div>
+</div>
+            </div> 
+            <div id="repairUserPage" class="page-content" style="display: none">
+              <div class="card">
+                <button type="button" class="btn btn-primary" style="width: 100%; margin-bottom: 16px; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; position: relative; padding: 12px 0;" onclick="toggleSection('repairFormContainer', '.toggle-icon', this)">
+  <span data-i18n="btn_fill_repair">填寫報修申請表</span>
+  <span class="toggle-icon" style="position: absolute; right: 20px;">▼</span>
+</button>
+                
+                <div id="repairFormContainer" style="display: none;">
+                  <form id="repairForm" onsubmit="previewRepairRequest(event)">
+                    <div class="form-group">
+                      <label class="form-label" data-i18n="repair_item">申請維修項目</label>
+                      <select class="form-input" id="repairType" required>
+                        <option value="室內" data-i18n="repair_indoor">室內</option>
+                        <option value="公共設施" data-i18n="repair_public">公共設施</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" data-i18n="repair_desc">損壞情形 (限最多50字)</label>
+                      <textarea class="form-input" id="repairDesc" maxlength="50" rows="3" required placeholder="請簡述損壞情況..." data-i18n-placeholder="repair_desc_placeholder"></textarea>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" style="font-weight: 600;" data-i18n="repair_presence_title">是否需要本寢室住宿學生在場始可施行維修？</label>
+                      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px; background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <label style="font-size: 14px; display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                          <input type="radio" name="repairPresence" value="不需要" required style="margin-top: 4px;">
+                          <span data-i18n="repair_presence_no"><b>不需要</b> (為利維修時效，管理員將儘速逕行前去維修，修繕後以本宿舍系統通知學生維修情況。並請申請人負責轉知室友知悉，貴重物品請妥善保管)</span>
+                        </label>
+                        <label style="font-size: 14px; display: flex; align-items: flex-start; gap: 8px; cursor: pointer;">
+                          <input type="radio" name="repairPresence" value="需要" required style="margin-top: 4px;">
+                          <span data-i18n="repair_presence_yes"><b>需要</b> (請至管理室一趟預約維修時間)</span>
+                        </label>
+                      </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 16px;" data-i18n="btn_preview_repair">填寫完畢，預覽確認資料</button>
+                  </form>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 style="margin-bottom: 16px; color: #4a90e2; font-size: 24px; font-weight: bold;" data-i18n="repair_history_title">報修歷史紀錄</h3>
+                <div id="userRepairHistoryList" style="display: grid; gap: 12px;"></div>
+              </div>
+            </div>
+
+            <div id="repairAdminPage" class="page-content" style="display: none">
+              <div class="card">
+                <h3 style="margin-bottom: 16px; color: #b91c1c; font-size: 24px; font-weight: bold;" data-i18n="nav_repair_admin">損壞報修管理</h3>
+                <div class="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th data-i18n="date">日期</th>
+                        <th data-i18n="applicant_info">申請人資訊</th>
+                        <th data-i18n="repair_details">維修項目/損壞情形</th>
+                        <th data-i18n="presence_req">在場要求</th>
+                        <th data-i18n="status">狀態</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adminRepairTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div id="packageUserPage" class="page-content" style="display: none">
+              <div class="card">
+                <div style="background: #f8fafc; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+                    <div style="width: 100%; max-width: 800px;">
+                      <h3 style="font-size: 18px; font-weight: 600; color: #1e3a8a; margin-bottom: 8px;" data-i18n="address_guide_title">📦 宿舍包裹寄件資訊</h3>
+                      <p style="color: #e11d48; font-weight: 600; font-size: 15px; margin-bottom: 16px;" data-i18n="address_no_reg">無需註冊包裹代收</p>
+                      
+                      <div style="margin-bottom: 16px;">
+                        <div style="cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="toggleSection('addressGuideContent', 'addressToggleIcon', this)">
+                           <b style="color: #4a90e2; font-size: 15px;" data-i18n="address_step1">步驟 1: 寄貨時填寫正確地址(箭頭點開)</b>
+                           <span id="addressToggleIcon" style="color: #4a90e2; font-size: 12px;">▼</span>
+                        </div>
+                        <div id="addressGuideContent" style="display: none; margin-top: 8px; background: #fff; padding: 12px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                           <p style="color: #475569; font-size: 14px; margin-top: 4px;" data-i18n="address_guide_desc">請依您住宿的棟別填寫，格式如下（請將 0000 室、000 換成您的房號與姓名）：</p>
+                           <ul style="color: #334155; font-size: 14px; line-height: 1.8; margin-top: 8px; margin-left: 12px;">
+                             <li data-i18n="address_a"><b>住宿 A 棟：</b>嘉義縣民雄鄉三興村 161 號（學士班宿舍 0000 室 000 收）</li>
+                             <li data-i18n="address_b"><b>住宿 B 棟：</b>嘉義縣民雄鄉三興村 162 號（學士班宿舍 0000 室 000 收）</li>
+                             <li data-i18n="address_c"><b>住宿 C 棟：</b>嘉義縣民雄鄉三興村 163 號（學士班宿舍 0000 室 000 收）</li>
+                             <li data-i18n="address_d"><b>住宿 D 棟：</b>嘉義縣民雄鄉三興村 164 號（學士班宿舍 0000 室 000 收）</li>
+                             <li data-i18n="address_e"><b>住宿 E 棟：</b>嘉義縣民雄鄉三興村 165 號（學士班宿舍 0000 室 000 收）</li>
+                           </ul>
+                        </div>
+                      </div>
+
+                      <div style="margin-bottom: 16px;">
+                        <b style="color: #4a90e2; font-size: 15px;" data-i18n="address_step2">步驟 2: 包裹到達後顯示於下方的已到達欄位</b>
+                      </div>
+
+                      <div style="margin-bottom: 16px;">
+                        <b style="color: #4a90e2; font-size: 15px;" data-i18n="address_step3">步驟 3: 前往學士班宿舍管理室領取包裹 (說出手機後三碼)</b>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="showInquiryModal()" style="white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                      <span data-i18n="inquire_btn">❓包裹未顯示?發送詢問</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb;">
+                  <button class="btn btn-secondary" onclick="filterPackages('arrived')" id="arrivedTab" style="border-radius: 0; background: transparent; box-shadow: none; border-bottom: 3px solid #4a90e2; padding: 10px 20px;">
+                    <span data-i18n="arrived"></span>
+                  </button>
+                  <button class="btn btn-secondary" onclick="filterPackages('received')" id="receivedTab" style="border-radius: 0; background: transparent; box-shadow: none; border-bottom: 3px solid transparent; padding: 10px 20px;">
+                    <span data-i18n="received"></span>
+                  </button>
+                </div>
+                <div id="packageList"></div>
+                <div id="paginationControls" class="pagination-container"></div>
+              </div>
+            </div>
+
+            <div id="facilityUserPage" class="page-content" style="display: none">
+              <div class="card">
+                <button type="button" class="btn btn-primary" style="width: 100%; margin-bottom: 16px; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; position: relative; padding: 12px 0;" onclick="toggleSection('facilityFormContainer', '.toggle-icon', this)">
+  <span data-i18n="btn_fill_facility">填寫場地申請表</span>
+  <span class="toggle-icon" style="position: absolute; right: 20px;">▼</span>
+</button>
+                
+                <div id="facilityFormContainer" style="display: none;">
+                  <form id="facilityForm" onsubmit="submitFacilityRequest(event)">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                      <div class="form-group">
+                        <label class="form-label"><span data-i18n="apply_club">申請社團/系級</span></label>
+                        <input type="text" class="form-input" id="facClub" required />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label"><span data-i18n="pic_name">負責人</span></label>
+                        <input type="text" class="form-input" id="facPic" required />
+                      </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><span data-i18n="activity_name">活動名稱 (含用途說明)</span></label>
+                        <input type="text" class="form-input" id="facActivity" required />
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                      <div class="form-group">
+                        <label class="form-label"><span data-i18n="contact_phone">聯絡電話</span></label>
+                        <input type="tel" class="form-input" id="facPhone" required />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label"><span data-i18n="attendees">參加人數</span></label>
+                        <input type="number" class="form-input" id="facAttendees" min="1" required />
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                      <div class="form-group">
+                        <label class="form-label"><span data-i18n="borrow_date">借用日期</span></label>
+                        <input type="date" class="form-input" id="facDate" required />
+                      </div>
+                      <div class="form-group">
+                        <label class="form-label"><span data-i18n="time_slot">借用時段</span></label>
+                        <select class="form-input" id="facTimeSlot" required>
+                          <option value="上午 (08:00-12:00)" data-i18n="time_morning">上午 (08:00-12:00)</option>
+                          <option value="下午 (13:00-17:00)" data-i18n="time_afternoon">下午 (13:00-17:00)</option>
+                          <option value="晚上 (18:00-22:00)" data-i18n="time_evening">晚上 (18:00-22:00)</option>
+                          <option value="全天 (08:00-22:00)" data-i18n="time_fullday">全天 (08:00-22:00)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><span data-i18n="venue">場地</span></label>
+                      <select class="form-input" id="facVenue" onchange="toggleOtherVenue()" required>
+                        <option value="大AB1" data-i18n="venue_big_ab1">大AB1</option>
+                        <option value="小AB1" data-i18n="venue_small_ab1">小AB1</option>
+                        <option value="大CB1" data-i18n="venue_big_cb1">大CB1</option>
+                        <option value="小CB1" data-i18n="venue_small_cb1">小CB1</option>
+                        <option value="CD棟前近樓梯處(限借桌1張、椅2張)" data-i18n="venue_cd_stairs">CD棟前近樓梯處(限借桌1張、椅2張)</option>
+                        <option value="EB1前空地" data-i18n="venue_eb1_space">EB1前空地</option>
+                        <option value="other" data-i18n="venue_other">其他場地：</option>
+                      </select>
+                    </div>
+                    <div class="form-group" id="otherVenueGroup" style="display: none;">
+                      <label class="form-label"><span data-i18n="other_venue">其他場地名稱</span></label>
+                      <input type="text" class="form-input" id="facOtherVenue" />
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="facSubmitBtn" style="width: 100%;">
+                      <span data-i18n="btn_submit_rental">送出申請</span>
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 style="margin-bottom: 8px; color: #4a90e2; font-size: 24px; font-weight: bold;"><span data-i18n="rental_history">申請紀錄</span></h3>
+                <p style="color: #ef4444; font-size: 16px; font-weight: 600; margin-bottom: 16px;" data-i18n="rental_note">(當申請結果通過, 請在活動前兩小時至管理室領取鑰匙並抵押證件)</p>
+                <div class="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th data-i18n="borrow_date">借用日期</th>
+                        <th data-i18n="time_slot">時段</th>
+                        <th data-i18n="venue">場地</th>
+                        <th data-i18n="activity_name">活動名稱</th>
+                        <th data-i18n="status">狀態</th>
+                        <th data-i18n="reason">原因</th>
+                      </tr>
+                    </thead>
+                    <tbody id="userFacilityTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div id="laundryUserPage" class="page-content" style="display: none">
+              <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                  <h3 id="laundryMainTitle" style="color: #4a90e2; font-size: 24px; font-weight: bold;">洗/烘衣機狀態</h3>
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <label style="font-weight: 600; color: #64748b;" data-i18n="laundry_select_location">選擇區域：</label>
+                    <select class="form-input" id="laundryLocationSelect" onchange="loadLaundryData()" style="width: auto; min-width: 200px;">
+                      <option value="yJL1OU" data-i18n="laundry_loc_de">DE棟</option>
+                      <option value="Ecy94C" data-i18n="laundry_loc_c">C棟</option>
+                      <option value="ehuYvg" data-i18n="laundry_loc_a">A棟</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadLaundryData()">↻</button>
+                  </div>
+                </div>
+                <div id="laundryMachinesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;"></div>
+              </div>
+            </div>
+
+            <div id="settingsPage" class="page-content" style="display: none">
+              <div class="card">
+                <div style="display: grid; gap: 24px">
+                  <div>
+                    <h3 style="margin-bottom: 16px; color: #4a90e2"><span data-i18n="profile_info">Profile Information</span></h3>
+                    <div class="form-group">
+                      <label class="form-label"><span data-i18n="name"></span></label>
+                      <input type="text" class="form-input" id="settingsName" disabled="" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><span data-i18n="student_id_account"></span></label>
+                      <input type="text" class="form-input" id="settingsEmail" disabled="" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 style="margin-bottom: 16px; color: #4a90e2"><span data-i18n="editable_info">Editable Information</span></h3>
+                    <div class="form-group">
+                      <label class="form-label"><span data-i18n="room_bed_number"></span></label>
+                      <div style="display: flex; gap: 12px; align-items: center">
+                        <input type="text" class="form-input" id="settingsRoom" style="flex: 1" />
+                        <input type="text" class="form-input" id="settingsBed" style="flex: 1" />
+                        <button class="btn btn-primary" onclick="requestRoomChange(event)"><span data-i18n="btn_request_change">Request Change</span></button>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><span data-i18n="phone_number"></span></label>
+                      <div style="display: flex; gap: 12px; align-items: center">
+                        <input type="tel" class="form-input" id="settingsPhone" style="flex: 1" />
+                        <button class="btn btn-success" onclick="updatePhone(event)"><span data-i18n="btn_update">Update</span></button>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 style="margin-bottom: 16px; color: #4a90e2"><span data-i18n="change_password">Change Password</span></h3>
+                    <div class="form-group">
+                      <label class="form-label"><span data-i18n="current_password"></span></label>
+                      <div style="position: relative; width: 100%">
+                        <input type="password" class="form-input" id="currentPassword" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+                        <span id="currentPwdIcon" onclick="togglePasswordVisibility('currentPassword', 'currentPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
+                          <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                        </span>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><span data-i18n="new_password"></span></label>
+                      <div style="position: relative; width: 100%">
+                        <input type="password" class="form-input" id="newPassword" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+                        <span id="newPwdIcon" onclick="togglePasswordVisibility('newPassword', 'newPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
+                          <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                        </span>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label"><span data-i18n="confirm_new_password"></span></label>
+                      <div style="position: relative; width: 100%">
+                        <input type="password" class="form-input" id="confirmPassword" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+                        <span id="confirmPwdIcon" onclick="togglePasswordVisibility('confirmPassword', 'confirmPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
+                          <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                        </span>
+                      </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="changePassword(event)"><span data-i18n="btn_change_password">Change Password</span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="faqPage" class="page-content" style="display: none">
+              <div class="card">
+                <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                  <button class="btn btn-primary" onclick="filterFAQ('all')" id="faqAllBtn"><span data-i18n="faq_all">All</span></button>
+                  <button class="btn btn-secondary" onclick="filterFAQ('checkin')" id="faqCheckinBtn"><span data-i18n="faq_checkin">Check-in/Out</span></button>
+                  <button class="btn btn-secondary" onclick="filterFAQ('facilities')" id="faqFacilitiesBtn"><span data-i18n="faq_facilities">Facilities</span></button>
+                  <button class="btn btn-secondary" onclick="filterFAQ('life')" id="faqLifeBtn"><span data-i18n="faq_life">Life & Rules</span></button>
+                  <button class="btn btn-secondary" onclick="filterFAQ('network')" id="faqNetworkBtn"><span data-i18n="faq_network">Network/Utils</span></button>
+                </div>
+                <div id="faqList"></div>
+              </div>
+            </div>
+
+            <div id="studentAccountAdminPage" class="page-content" style="display: none">
+              <div class="card" style="margin-bottom: 24px">
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                  <h3 style="margin-bottom: 12px; color: #334155; font-size: 24px; font-weight: bold;">批量創建學生帳號</h3>
+                  <p style="font-size: 18px; color: #64748b; margin-bottom: 16px; line-height: 1.6;">
+                    請上傳含學生資料的JSON或CSV檔案。資料應包含: studentId(學號), name(姓名), room(房號), bed (床號), phone(電話)。<br />
+                    預設密碼統一為：<b style="font-size: 20px; color: #e11d48;">CCU1234#@</b>
+                  </p>
+                  <div style="display: flex; gap: 12px; align-items: center">
+                    <input type="file" id="importStudentFile" accept=".json" class="form-input" style="flex: 1; padding: 10px; font-size: 16px;" />
+                    <button class="btn btn-primary" style="font-size: 18px; padding: 10px 24px;" onclick="importStudents()">匯入資料</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card" style="margin-bottom: 24px; border: 1px solid #fecdd3; background: #fff1f2;">
+                <h3 style="margin-bottom: 12px; color: #e11d48; font-size: 24px; font-weight: bold;">重置學生密碼</h3>
+                <p style="font-size: 16px; color: #be123c; margin-bottom: 16px; line-height: 1.6;">
+                  請先核對學生證確認身分。重置後，密碼將還原為預設：<b style="font-size: 20px;">CCU1234#@</b><br/>
+                  並強制該學生於下次登入時<b>必須重新設定新密碼</b>。
+                </p>
+                <div style="display: flex; gap: 12px; align-items: center; max-width: 500px;">
+                  <input type="text" id="resetPwdStudentId" class="form-input" placeholder="請輸入學號 (例: 410400000)" style="flex: 1; padding: 10px; font-size: 16px; border-color: #fda4af;" />
+                  <button class="btn btn-danger" style="font-size: 16px; padding: 10px 24px; background-color: #e11d48; border: none; font-weight: bold;" onclick="adminResetStudentPassword()">確認重置</button>
+                </div>
+              </div>
+
+              <div class="card" id="adminApprovalSection">
+                <h3 style="margin-bottom: 16px; color: #f59e0b; font-size: 24px; font-weight: bold;">待處理的房號更改申請</h3>
+                <div id="approvalList" style="display: grid; gap: 12px"></div>
+              </div>
+            </div>
+
+            <div id="packageAdminPage" class="page-content" style="display: none">
+              
+              <div class="card">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                  <div style="background: #fef3c7; padding: 16px; border-radius: 8px;">
+                    <div style="font-size: 18px; font-weight: bold;color: #6b7280">已到達 (待領取)</div>
+                    <div id="adminArrivedCount" style="font-size: 28px; font-weight: 700; color: #f59e0b">-</div>
+                  </div>
+                  <div style="background: #d1fae5; padding: 16px; border-radius: 8px;">
+                    <div style="font-size: 18px; font-weight: bold;color: #6b7280">已領取 (歷史紀錄)</div>
+                    <div id="adminReceivedCount" style="font-size: 28px; font-weight: 700; color: #10b981">-</div>
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+                  <select class="form-input" style="width: auto" id="adminSearchField" onchange="updateAdminSearchPlaceholder()">
+                    <option value="all">搜尋全部欄位</option>
+                    <option value="name">姓名</option>
+                    <option value="room">房號</option>
+                    <option value="phone">電話</option>
+                    <option value="tracking">物流單號</option>
+                  </select>
+                  <input type="text" class="form-input" placeholder="可搜尋：房號、姓名、電話 或 物流單號..." style="flex: 1; min-width: 250px" id="adminSearchInput" />
+                  <select class="form-input" style="width: auto" id="adminStatusFilter">
+                    <option value="all">所有狀態</option>
+                    <option value="arrived">已到達</option>
+                    <option value="received">已領取</option>
+                  </select>
+                </div>
+
+                <div class="table-container">
+                  <table id="adminPackageTable">
+                    <thead>
+                      <tr>
+                        <th>登記日期</th>
+                        <th>收件人</th>
+                        <th>房號/床號</th>
+                        <th>電話後3碼</th>
+                        <th>物流單號</th>
+                        <th>物流</th>
+                        <th>狀態</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adminPackageTableBody"></tbody>
+                  </table>
+                </div>
+                <div id="adminPaginationControls" class="pagination-container"></div>
+              </div>
+
+              <div class="card" style="background: #f0fdf4; border: 1px solid #bbf7d0; margin-bottom: 24px;">
+                <h3 style="margin-bottom: 16px; color: #166534; font-size: 24px; font-weight: bold;">登記到達包裹</h3>
+                <p style="font-size: 14px; color: #15803d; margin-bottom: 16px;">輸入學生的房號與床位，系統會自動綁定並發送到達通知。</p>
+                
+                <form onsubmit="adminRegisterPackage(event)" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                  <div style="flex: 1; min-width: 120px;">
+                    <label class="form-label" style="font-size: 14px;">房號</label>
+                    <input type="text" class="form-input" id="adminAddRoom" required placeholder="如: 1216" />
+                  </div>
+                  <div style="flex: 1; min-width: 100px;">
+                    <label class="form-label" style="font-size: 14px;">床位</label>
+                    <input type="text" class="form-input" id="adminAddBed" required placeholder="如: A" />
+                  </div>
+                  <div style="flex: 2; min-width: 200px;">
+                    <label class="form-label" style="font-size: 14px;">物流單號</label>
+                    <input type="text" class="form-input" id="adminAddTracking" required placeholder="請輸入單號" />
+                  </div>
+                  <div style="flex: 1; min-width: 150px;">
+                    <label class="form-label" style="font-size: 14px;">物流公司</label>
+                    <select class="form-input" id="adminAddCourier" required>
+                      <option value="T-Cat">黑貓宅急便</option>
+                      <option value="Taiwan Pelican Express">台灣宅配通</option>
+                      <option value="Hsinchu Logistics">新竹物流</option>
+                      <option value="Kerry TJ Logistics">嘉里大榮物流</option>
+                      <option value="Chunghwa Post">中華郵政</option>
+                      <option value="Shopee Express">蝦皮店到店</option>
+                      <option value="Other">其他</option>
+                    </select>
+                  </div>
+                  <button type="submit" class="btn btn-success" id="adminAddPkgBtn" style="white-space: nowrap; padding: 12px 24px;">登記並通知</button>
+                </form>
+
+                <div style="margin-top: 20px; border-top: 1px dashed #bbf7d0; padding-top: 20px;">
+                  <button type="button" class="btn btn-success" onclick="showBatchRegisterModal()" style="border: none; width: 100%; font-weight: bold; font-size: 16px; padding: 12px;">
+                    開啟「登記多個包裹」窗口
+                  </button>
+                </div>
+              </div>
+
+              <div class="card" id="adminInquiriesSection" style="margin-bottom: 24px;">
+                <h3 style="margin-bottom: 16px; color: #b91c1c; font-size: 24px; font-weight: bold;">待回覆的包裹詢問</h3>
+                <div id="adminInquiriesList" style="display: grid; gap: 12px"></div>
+              </div>
+
+            </div>
+
+            <div id="facilityAdminPage" class="page-content" style="display: none">
+              <div class="card" style="margin-bottom: 24px">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <h3 style="color: #10b981; font-size: 24px; font-weight: bold;">場地借用行事曆</h3>
+                  <div>
+                    <input type="date" id="adminFacilityDateFilter" class="form-input" onchange="window.currentFacPage = 1; loadAdminFacilitySchedule()" />
+                  </div>
+                </div>
+                <div class="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>借用日期</th>
+                        <th>時段</th>
+                        <th>場地</th>
+                        <th>申請社團</th>
+                        <th>負責人</th>
+                        <th>聯絡電話</th>
+                        <th>狀態</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adminFacilityScheduleBody"></tbody>
+                  </table>
+                </div>
+                <div id="adminFacilityPaginationControls" class="pagination-container"></div>
+              </div>
+
+              <div class="card">
+                <h3 style="margin-bottom: 16px; color: #f59e0b; font-size: 24px; font-weight: bold;">待審核的場地申請</h3>
+                <div id="adminFacilityApprovalList" style="display: grid; gap: 12px"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+    </div>
+
+<script type="module" src="scripts.js?v=106"></script>
+
+    <script>
+      // 處理摺疊內容的共用函數，徹底解決 Cannot redeclare 錯誤
+      function toggleSection(contentId, iconSelector, btnElement) {
+        const content = document.getElementById(contentId);
+        let icon;
+        if (iconSelector.startsWith('.')) {
+          icon = btnElement.querySelector(iconSelector);
+        } else {
+          icon = document.getElementById(iconSelector);
+        }
+        
+        if (content.style.display === 'none') {
+          content.style.display = 'block';
+          icon.innerText = '▲';
+        } else {
+          content.style.display = 'none';
+          icon.innerText = '▼';
+        }
+      }
+
+      function togglePasswordVisibility(inputId, containerId) {
+        const input = document.getElementById(inputId);
+        const container = document.getElementById(containerId);
+        const iconImg = container.querySelector("img");
+
+        if (input.type === "password") {
+          input.type = "text";
+          iconImg.src = "./images/hide.png";
+        } else {
+          input.type = "password";
+          iconImg.src = "./images/view.png";
+        }
+      }
+
+      function toggleOtherVenue() {
+        const venueSelect = document.getElementById("facVenue");
+        const otherGroup = document.getElementById("otherVenueGroup");
+        const otherInput = document.getElementById("facOtherVenue");
+        
+        if (venueSelect.value === "other") {
+          otherGroup.style.display = "block";
+          otherInput.required = true;
+        } else {
+          otherGroup.style.display = "none";
+          otherInput.required = false;
+          otherInput.value = "";
+        }
+      }
+
+      function toggleRejectReason() {
+        const reasonSelect = document.getElementById("rejectFacilityReason");
+        const otherGroup = document.getElementById("otherRejectReasonGroup");
+        const otherInput = document.getElementById("rejectFacilityOtherReason");
+        
+        if (reasonSelect.value === "其他") {
+          otherGroup.style.display = "block";
+          otherInput.required = true;
+        } else {
+          otherGroup.style.display = "none";
+          otherInput.required = false;
+          otherInput.value = "";
+        }
+      }
+    </script>
+
+    <script>
+      const faqData = [
+        { id: 1, category: "checkin" }, { id: 2, category: "checkin" }, { id: 3, category: "checkin" }, { id: 4, category: "checkin" },
+        { id: 5, category: "checkin" }, { id: 6, category: "checkin" }, { id: 7, category: "checkin" }, { id: 8, category: "checkin" },
+        { id: 9, category: "checkin" }, { id: 10, category: "checkin" }, { id: 11, category: "checkin" }, { id: 12, category: "checkin" },
+        { id: 13, category: "checkin" }, { id: 14, category: "checkin" }, { id: 15, category: "checkin" }, { id: 16, category: "checkin" },
+        { id: 17, category: "checkin" }, { id: 18, category: "checkin" }, { id: 19, category: "checkin" }, { id: 20, category: "checkin" },
+        { id: 21, category: "checkin" }, { id: 22, category: "checkin" }, { id: 23, category: "life" }, { id: 24, category: "life" },
+        { id: 25, category: "life" }, { id: 26, category: "network" }, { id: 27, category: "network" }, { id: 28, category: "network" },
+        { id: 29, category: "network" }, { id: 30, category: "checkin" }, { id: 31, category: "life" }, { id: 32, category: "checkin" },
+        { id: 33, category: "network" }, { id: 34, category: "checkin" }, { id: 35, category: "checkin" }, { id: 36, category: "life" },
+        { id: 37, category: "checkin" }, { id: 38, category: "facilities" }, { id: 39, category: "life" }, { id: 40, category: "life" },
+        { id: 41, category: "life" }, { id: 42, category: "life" }, { id: 43, category: "network" }, { id: 44, category: "life" },
+        { id: 45, category: "facilities" }, { id: 46, category: "checkin" }, { id: 47, category: "facilities" }, { id: 48, category: "checkin" },
+        { id: 49, category: "checkin" }, { id: 50, category: "checkin" }, { id: 51, category: "checkin" }
+      ];
+
+      window.filterFAQ = function(category) {
+        document.querySelectorAll('#faqPage .btn').forEach(btn => {
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-secondary');
+        });
+
+        let activeBtnId = 'faqAllBtn';
+        if(category === 'checkin') activeBtnId = 'faqCheckinBtn';
+        if(category === 'facilities') activeBtnId = 'faqFacilitiesBtn';
+        if(category === 'life') activeBtnId = 'faqLifeBtn';
+        if(category === 'network') activeBtnId = 'faqNetworkBtn';
+        document.getElementById(activeBtnId).classList.remove('btn-secondary');
+        document.getElementById(activeBtnId).classList.add('btn-primary');
+
+        const listDiv = document.getElementById('faqList');
+        listDiv.innerHTML = '';
+        faqData.forEach(item => {
+          if (category === 'all' || item.category === category) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'card';
+            wrapper.style.marginBottom = '16px';
+            wrapper.innerHTML = `
+              <h4 style="font-weight: 600; margin-bottom: 8px; color: #2c3e50;">
+                ${item.id}. <span data-i18n="faq_q${item.id}"></span>
+              </h4>
+              <p style="color: #4b5563; font-size: 14px; white-space: pre-wrap; margin: 0;"><span data-i18n="faq_a${item.id}"></span></p>
+            `;
+            listDiv.appendChild(wrapper);
+          }
+        });
+        updateContent();
+      };
+
+      i18next.init(
+        {
+          lng: navigator.language.startsWith("zh") ? "zh" : "en",
+          resources: {
+            en: {
+              translation: {
+                sys_notice: "System Notice", sys_confirm: "Confirm Action", btn_ok: "OK",
+                login_student_title: "Student Login", login_admin_title: "Admin Login", login_admin_register_title: "Admin Registration",
+                login_btn: "Login", signup_btn: "Sign Up", no_admin_account: "No admin account? ", already_have_account: "Already have an account? ",
+                enter_student_id: "Enter your Student ID", enter_admin_email: "Enter admin email", enter_password: "Enter password",
+                enter_admin_name: "Enter admin name", req_admin_reg: "Required for admin registration", admin_email: "Admin Email",
+                dormitory_management_system: "Dormitory Management System", dorm_system: "Dorm System", title: "Dormitory Management System",
+                student: "Student", admin: "Admin", student_id: "Student ID", student_id_account: "Student ID Account", password: "Password",
+                new_password: "New Password", confirm_password: "Confirm Password", confirm_new_password: "Confirm New Password",
+                current_password: "Current Password", admin_name: "Admin Name", admin_secret_key: "Admin Secret Key", login: "Login",
+                logout: "Logout", home: "Home", dashboard: "Dashboard", packages: "My Packages", settings: "Settings", faq: "FAQ",
+                frequently_asked_questions: "Frequently Asked Questions", notifications: "Notifications", user: "User", active_packages: "Active Packages",
+                get_help: "Get Help", tracking_number: "Tracking Number", courier_company: "Courier Company", select_company: "Select Company",
+                t_cat: "T-Cat", pelican: "Taiwan Pelican Express", hsinchu: "Hsinchu Logistics", kerry: "Kerry TJ Logistics", post: "Chunghwa Post",
+                shopee_express: "Shopee Express",
+                express: "On-demand Delivery", other: "Other", arrived: "Arrived", received: "Received", registered: "Registered", name: "Name",
+                room_bed_number: "Room / Bed Number", phone_number: "Phone Number", action_required: "Action Required", functions: "FUNCTIONS", admin_functions: "ADMIN FUNCTIONS",
+                mark_as_read: "Mark As Read", my_packages: "My Packages", welcome: "Welcome", room_label: "Room", bed_label: "Bed", btn_next: "Next",
+                btn_back: "Back", btn_register: "Register", btn_cancel: "Cancel", profile_info: "Profile Information", editable_info: "Editable Information",
+                change_password: "Change Password", btn_request_change: "Request Change", btn_update: "Update", btn_change_password: "Change Password",
+                forgot_password: "Forgot Password?",
+                faq_all: "All", faq_checkin: "Check-in/Out", faq_facilities: "Facilities", faq_life: "Life & Rules", faq_network: "Network/Utils",
+                tracking: "Tracking", registered_on: "Registered on", no_packages: "No packages",
+                
+                address_guide_title: "📦 Shipping Address Info", address_no_reg: "No package proxy registration required",
+                address_step1: "Step 1: Fill in the correct address when shipping(open arrow)", address_guide_desc: "Please use the following format based on your dorm building (replace 0000 with your room and 000 with your name):",
+                address_a: "Building A: No. 161, Sanxing Vil., Minx Township, Chiayi County (Dorm Rm 0000, Name 000)", address_b: "Building B: No. 162, Sanxing Vil., Minx Township, Chiayi County (Dorm Rm 0000, Name 000)",
+                address_c: "Building C: No. 163, Sanxing Vil., Minx Township, Chiayi County (Dorm Rm 0000, Name 000)", address_d: "Building D: No. 164, Sanxing Vil., Minx Township, Chiayi County (Dorm Rm 0000, Name 000)",
+                address_e: "Building E: No. 165, Sanxing Vil., Minx Township, Chiayi County (Dorm Rm 0000, Name 000)",
+                address_step2: "Step 2: Packages will appear in the 'Arrived' section below", address_step3: "Step 3: Go to the management office to collect (provide last 3 digits of phone)",
+                inquire_btn: "❓ Package Missing? Send Inquiry", inquiry_modal_title: "Send Inquiry", inquiry_desc: "If your shopping app says delivered but you have no notification here, submit an inquiry.",
+                enter_tracking: "Tracking Number", inquiry_submit: "Submit",
+                
+                venue_big_ab1: "Large AB1", venue_small_ab1: "Small AB1", venue_big_cb1: "Large CB1", venue_small_cb1: "Small CB1",
+                venue_cd_stairs: "Front of CD Stairs (Max 1 table, 2 chairs)", venue_eb1_space: "EB1 Front Space", venue_other: "Other Venue:",
+                facility_rental: "Facility Rental", apply_club: "Applying Club/Dept", pic_name: "Person in Charge", 
+                activity_name: "Activity Name & Desc", contact_phone: "Contact Phone", borrow_date: "Date",
+                attendees: "Attendees", time_slot: "Time Slot", venue: "Venue", other_venue: "Other Venue Name",
+                btn_fill_facility: "Fill Facility Rental Form (click it)",
+                btn_submit_rental: "Submit Application", rental_history: "Application History", rental_note: "(When approved, get the key 2 hours before the event)",
+                status: "Status", reason: "Reason", status_pending: "Pending", status_approved: "Approved", status_rejected: "Rejected",
+                time_morning: "Morning (08:00-12:00)", time_afternoon: "Afternoon (13:00-17:00)", 
+                time_evening: "Evening (18:00-22:00)", time_fullday: "Full Day (08:00-22:00)", facility_conflict: "Time slot conflict! This venue is already booked.",
+
+                nav_repair: "Repair Request", nav_repair_admin: "Repair Management", repair_form_title: "Submit Repair Request",
+                btn_fill_repair: "Fill Repair Request Form (click it)",
+                repair_item: "Repair Item", repair_indoor: "Indoor", repair_public: "Public Facility", repair_desc: "Damage Description (Max 50 chars)",
+                repair_desc_placeholder: "Briefly describe the damage...", repair_presence_title: "Requires roommate presence during repair?",
+                repair_presence_no: "No", repair_presence_yes: "Yes (Please visit the management office to schedule a repair time)", btn_preview_repair: "Preview & Confirm", repair_history_title: "Repair History",
+                date: "Date", applicant_info: "Applicant Info", repair_details: "Repair Item/Desc", presence_req: "Presence Required",
+                btn_submit_repair: "Submit", repair_confirm_title: "Confirm Repair Data",
+
+                NOTIF_ROOM_APPROVED_TITLE: "Room Update Approved", NOTIF_ROOM_APPROVED_MSG: "Your room has been successfully updated to Room {{room}} (Bed {{bed}}).",
+                NOTIF_ROOM_DECLINED_TITLE: "Room Update Declined", NOTIF_ROOM_DECLINED_MSG: "Your room update request was declined by the administrator.",
+                NOTIF_PKG_REG_TITLE: "Package Registered", NOTIF_PKG_REG_MSG: "Tracking: {{tracking}}",
+                NOTIF_PKG_ARR_TITLE: "Package Arrived", NOTIF_PKG_ARR_MSG: "Package {{tracking}} is ready. Verify with last 3 phone digits.",
+                NOTIF_PKG_REC_TITLE: "Package Received", NOTIF_PKG_REC_MSG: "Package {{tracking}} received.",
+                NOTIF_PKG_NOT_FOUND_TITLE: "Inquiry Reply: Not Received", NOTIF_PKG_NOT_FOUND_MSG: "Admin checked. Tracking {{tracking}} has not arrived at the dorm.",
+                NOTIF_NONE: "No notifications", NOTIF_PKG_NEW_TITLE: "📦 You have a new package!", 
+                NOTIF_PKG_NEW_MSG: "Your package has arrived at the management office. Please collect it as soon as possible.",
+                NOTIF_FAC_APPROVED_TITLE: "Facility Rental Approved", NOTIF_FAC_APPROVED_MSG: "Your rental request for {{venue}} on {{date}} has been approved.",
+                NOTIF_FAC_DECLINED_TITLE: "Facility Rental Declined", NOTIF_FAC_DECLINED_MSG: "Your rental request for {{venue}} on {{date}} has been rejected. Reason: {{reason}}",
+                
+                err_login: "Login failed. Please check your ID and Password.",
+                err_email_used: "This email is already registered. Please log in.",
+                err_no_presence: "Please select if presence is required.",
+                msg_repair_submitted: "Repair request submitted! Check history for updates.",
+                msg_fac_submitted: "Facility request submitted!\nNote: If approved, pick up the key 2 hours before your event.",
+                msg_room_submitted: "Room change request submitted! Waiting for Admin approval.",
+                msg_inquiry_submitted: "Inquiry submitted! Please wait for admin's reply.",
+                confirm_logout: "Are you sure you want to logout?",
+                confirm_clear_notif: "Delete all notifications?",
+                confirm_pkg_received: "Mark this package as received?",
+                confirm_pkg_revert: "Revert package status back to Arrived?",
+                confirm_inquiry_received: "Mark as 'Received'? (Notifies student & adds to Arrived list)",
+                confirm_inquiry_not_found: "Mark as 'Not Found'? (Notifies student it hasn't arrived)",
+                confirm_approve_fac: "Approve this facility request?",
+                confirm_approve_room: "Approve this room change?",
+                confirm_reject_room: "Reject this room change?",
+
+                faq_q1: "I am not staying in the dorm next semester. What is the procedure?", faq_a1: "Please download the 'Non-renewal Application' from the Student Affairs Office website before 16:00 on Jan 4, 2026, and submit it to the C Building Service Center. Failure to do so implies you will continue staying in your original room.",
+                faq_q2: "I want to check out now. What should I do?", faq_a2: "Please go to the dorm management office to fill out the necessary forms, empty your room, and return the key.",
+                faq_q3: "Will I get a partial refund if I check out mid-semester?", faq_a3: "Yes. It depends on when you check out: First semester (1/3 mark on Oct 17, 2025; 2/3 mark on Nov 28, 2025) and Second semester (1/3 mark on Apr 1, 2026; 2/3 mark on May 15, 2026). Please discuss this with the manager during office hours (9 AM - 4 PM).",
+                faq_q4: "Can I check out mid-semester?", faq_a4: "Yes, you need to complete the procedures at the management office, empty the room, and return the key.",
+                faq_q5: "What is the procedure to stay during the winter break?", faq_a5: "No procedure is needed. According to the announcement, residents of the first semester of the 2025 academic year 'do not need to reapply' and can stay in their original rooms directly.",
+                faq_q6: "What should I do if I am not staying during the winter break?", faq_a6: "You must apply for 'No Winter Stay' at the management office between Dec 12 and Dec 31, 2025, to process the refund according to regulations.",
+                faq_q7: "Are there any winter camp stays available for application?", faq_a7: "No. The announcement explicitly states that 'from the 2025 academic year, winter camps in undergraduate dorms are not open for application' due to a lack of vacant rooms.",
+                faq_q8: "What should I be aware of if I am not staying during the winter break?", faq_a8: "- Must apply before Dec 31.\n- Must check out before 10:00 on Jan 13, 2026.\n- Personal items cannot be stored in the lounges during the winter break; violators' items will be treated as waste.",
+                faq_q9: "When does winter break accommodation start?", faq_a9: "From Jan 13, 2026.",
+                faq_q10: "When does winter break accommodation end?", faq_a10: "Until Feb 9, 2026.",
+                faq_q11: "Where will the refund for not staying during winter break go?", faq_a11: "The refund will be transferred to the financial account you provided in the student status system.",
+                faq_q12: "When is the application period for not staying during winter break?", faq_a12: "From Dec 12, 2025, to Dec 31, 2025.",
+                faq_q13: "If I stay during winter break but not next semester, when should I check out?", faq_a13: "Please complete the checkout procedures before 10:00 on Feb 9, 2026.",
+                faq_q14: "What happens if my checkout procedure is overdue?", faq_a14: "Those who check out late will be handled according to dorm regulations and charged an accommodation fee of 130 TWD per day (deducted from the deposit).",
+                faq_q15: "Can I still apply if I missed the winter break checkout application deadline?", faq_a15: "Please visit the dorm management office during working hours (9 AM - 4 PM) to communicate with the manager.",
+                faq_q16: "When is the move-in for the 2nd semester of 2025?", faq_a16: "Move-in starts at 10:00 on Feb 13, 2026.",
+                faq_q17: "When should I apply if I am not staying next semester?", faq_a17: "From now until 16:00 on Jan 4, 2026.",
+                faq_q18: "When is the dorm bed application period?", faq_a18: "Registration is open from 12:00 on Dec 15, 2025 (Mon) to 17:00 on Dec 30, 2025 (Tue).",
+                faq_q19: "Where do I apply for a dorm bed?", faq_a19: "Website: https://www026186.ccu.edu.tw/dormapply/",
+                faq_q20: "Do Master's and PhD students apply at the same time and manner?", faq_a20: "No. Master's and PhD dorm allocations remain the same and are allocated by their respective departments.",
+                faq_q21: "When is the dorm draw? Do I need to be there in person?", faq_a21: "The draw is scheduled during the 'Bed Allocation Briefing' on Dec 31, 2025. Applicants do not need to attend.",
+                faq_q22: "How do I know if I got a dorm bed?", faq_a22: "You can check the 'Undergraduate Dormitory Management System' the day after the draw (after Jan 1, 2026).",
+                faq_q23: "Who can I ask if I have questions?", faq_a23: "Student Affairs Office, Life Affairs Division: ext. 12102.\nUndergraduate Dorm Service Center: ext. 73399.\nElectricity Meter Room: ext. 75595 (Mon-Fri 18:00-21:00).",
+                faq_q24: "How much is the parking fee when driving into campus for moving?", faq_a24: "Free if you leave within 30 minutes; otherwise, a site cleaning and maintenance fee of 100 TWD per entry applies.",
+                faq_q25: "Can I get a parking discount voucher at the dorm?", faq_a25: "No. The student dormitory does not provide parking discount vouchers.",
+                faq_q26: "When can I apply for the network for next semester?", faq_a26: "Applications open on Feb 20.",
+                faq_q27: "Is the network during winter/summer breaks different from the semester? When does it switch?", faq_a27: "Yes, it is different. Winter break network: apply from Jan 5, switches at 10:00 on Jan 13. Next semester network: apply from Feb 20, switches at 10:00 on Feb 21.",
+                faq_q28: "When can I use it after applying?", faq_a28: "The wired network can be used 30 minutes after application; the wireless network requires payment first.",
+                faq_q29: "Will my internet be disconnected if I forget to pay?", faq_a29: "Yes. Starting 10:00 on Mar 9, holders who have applied but not paid will be disconnected.",
+                faq_q30: "Can I apply for a refund if I don't stay during the winter break?", faq_a30: "Yes. According to the announcement, the first semester dorm fee includes prepaid winter break fees. Apply for a refund at the management office.",
+                faq_q31: "Can I leave my luggage in the lounge during the winter break?", faq_a31: "No. The announcement states that 'lounges in all buildings are not open for storing personal items at the end of the first semester and during winter break.' Violators' items will be treated as waste.",
+                faq_q32: "When can I move back in for the next semester?", faq_a32: "Move-in processing starts at 10:00 on Feb 13, 2026.",
+                faq_q33: "How much is the public electricity bill for the dorm?", faq_a33: "According to the E building sample in Nov 2025, the total public electricity fee per person for that month was about 45 TWD.",
+                faq_q34: "Can I change rooms during the semester? How?", faq_a34: "Yes, with a valid reason (e.g., incompatible schedules with roommates). Discuss with the manager at the office and complete the forms.",
+                faq_q35: "How do I apply to continue staying?", faq_a35: "If you stayed the first semester and did not apply to move out for the second, your stay automatically continues.",
+                faq_q36: "Dorm service center hours and contact info?", faq_a36: "Hours: 24/7 for students, closed only during the Lunar New Year holiday.\nUndergraduate Dorm: 05-2721422 ext 73399 (dormcol@ccu.edu.tw).\nMaster/PhD Dorm: 05-2721422 ext 82121 (admkwc@ccu.edu.tw).",
+                faq_q37: "How much are dorm fees and how to pay?", faq_a37: "Check the fee schedule on the school website. To pay, visit the Bank of Taiwan portal (via school website), print your payment slip, and follow the instructions.",
+                faq_q38: "How to report dorm repairs?", faq_a38: "Log into the Ecourse repair application system. For urgent repairs, call the dorm service center directly (ext. 73399).",
+                faq_q39: "How do I send mail/packages to the dorm?", faq_a39: "For undergraduate dorms (A-E), use the address: No. 161-165, Sanxing Vil., Minx Township, Chiayi County (Specify Building, Room, and Name). For Master/PhD, use No. 168, University Rd. Large or perishable items require the courier to contact you. If unavailable, fill out a 'Proxy Receipt Form' at the service center (no frozen/refrigerated/COD items).",
+                faq_q40: "Is there a night medical station?", faq_a40: "Yes, located in the B1 of Undergraduate Building C. Provides emergency care and consultation from 6 PM to 10 PM daily, staffed by Dalin Tzu Chi Hospital professionals.",
+                faq_q41: "Can visitors enter my room or stay overnight?", faq_a41: "No unauthorized entry, staying overnight, or using the showers. Guests should be met in the lobby. If entry is necessary, get roommates' consent, register for a pass, and wear a visitor vest.",
+                faq_q42: "What vehicles are allowed and how to get a permit?", faq_a42: "1. Bicycles, electric bikes, and cars are allowed; motorcycles cannot enter the campus.\n2. Apply for a parking permit at the General Affairs Office.\n3. Motorcycles can only park in designated lots at the main/side gates.",
+                faq_q43: "How does the dorm electricity billing work?", faq_a43: "1. Each room has an independent meter, billed monthly based on Taipower's residential rates.\n2. Public electricity is measured, with 50% split between residents and the school.\n3. Meter office is at Building C lobby (Mon-Fri 18:00-21:00).\n4. A prepaid electricity fee is collected before move-in, settled at the semester's end.",
+                faq_q44: "Are there pushcarts available to borrow?", faq_a44: "Yes, available from 10 AM to 10 PM. Leave your ID and fill out a form at the management office to borrow.",
+                faq_q45: "What if public facilities are broken?", faq_a45: "Notify the manager at the office or apply for repair via the Ecourse system (specify it's a public facility).",
+                faq_q46: "Can I apply for the second round/waitlist if I didn't get a bed?", faq_a46: "Yes, usually announced before the new school year starts. Fill out forms at the management office or call ext. 73399.",
+                faq_q47: "Can I get a refund if the vending/laundry machine eats my money?", faq_a47: "Yes. Go to the management office, specify the machine number, and leave your contact info for the refund.",
+                faq_q48: "Can I cancel my checkout application if I change my mind?", faq_a48: "Please visit the management office during office hours to confirm your details and communicate with the manager.",
+                faq_q49: "What is the second round waitlist?", faq_a49: "If there are leftover beds, you will be assigned one, but you cannot choose the bed yourself.",
+                faq_q50: "How do 5th-year seniors apply for accommodation?", faq_a50: "They can only apply through the second round waitlist process.",
+                faq_q51: "Do I need to draw lots again for the second semester if I stayed in the first?", faq_a51: "No. If you had a bed in the first semester, you don't need to draw again; you keep your original bed.",
+                
+                nav_laundry: "Laundry Status",
+                force_pwd_desc: "For security reasons, please set a new password before continuing.",
+                btn_update_password: "Update Password",
+                laundry_building: "Page under construction...",
+                laundry_desc: "This page will display the status of washers/dryers and their countdown times.",
+                no_repair_history: "No repair history",
+                no_facility_history: "No facility rental history",
+                repair_status_pending: "Pending",
+                repair_status_in_progress: "In Progress",
+                repair_status_completed: "Completed",
+                repair_presence_yes_short: "Yes",
+                repair_presence_no_short: "No",
+                time_just_now: "Just now",
+                time_mins_ago: "{{count}} mins ago",
+                time_hours_ago: "{{count}} hours ago",
+                time_days_ago: "{{count}} days ago",
+                lbl_name: "Name",
+                lbl_student_id: "Student ID",
+                lbl_phone: "Phone",
+                lbl_room_bed: "Room/Bed",
+                lbl_repair_item: "Repair Item",
+                lbl_damage_desc: "Description",
+                lbl_presence_req: "Presence Required",
+                lbl_requested_at: "Requested at",
+                laundry_select_location: "Select Building:",
+                laundry_loc_de: "Building DE",
+                laundry_loc_c: "Building C",
+                laundry_loc_a: "Building A",
+                laundry_washer: "Washer",
+                laundry_dryer: "Dryer",
+                laundry_available: "Available",
+                laundry_in_use: "In Use",
+                laundry_mins_left: "mins left",
+                laundry_loading: "Fetching live data...",
+                laundry_error: "Failed to load data.",
+                laundry_finished: "Finished",
+                laundry_offline: "Offline",
+                laundry_washers_sec: "Washers",
+                laundry_building_title: "{{building}} Laundry",
+                laundry_dryers_sec: "Dryers",
+                laundry_started_at: "Started at {{time}}",
+                laundry_notify_washer: "🔔Notify me[Washer]",
+                laundry_notify_dryer: "🔔Notify me[Dryer]",
+                laundry_sub_success: "Subscribed! We will notify you when a machine is available.",
+                NOTIF_LAUNDRY_TITLE: "Machine Available!",
+                NOTIF_LAUNDRY_MSG: "A {{type}} is now available at {{location}}.",
+                laundry_not_full_washer: "There are available washers right now!",
+                laundry_not_full_dryer: "There are available dryers right now!",
+                loading_btn: "Loading...",
+                pending_count: "Pending:",
+                ai_assistant: "AI Assistant",
+                ai_assistant_desc: "Ask Anything About Dorm",
+                ai_loading_msg: "AI Assistant is still loading, please wait a moment...",
+                reject_title: "Reason for Rejection",
+                reject_select_reason: "Please select a reason",
+                reject_placeholder: "Please select...",
+                reject_rented: "Rented to another unit",
+                reject_maintenance: "Venue under maintenance",
+                reject_closed: "Venue not open",
+                reject_other: "Other",
+                reject_other_label: "Other reason",
+                btn_confirm_reject: "Confirm Rejection",
+                forgot_pwd_alert: "Please bring your Student ID to the undergraduate dorm management office. After the admin verifies your identity, they will help you reset your password!",
+                NOTIF_REPAIR_UPDATE_TITLE: "Repair Status Update",
+                NOTIF_REPAIR_IN_PROGRESS_MSG: "Your repair request has been accepted and is currently being assigned for repair.",
+                NOTIF_REPAIR_COMPLETED_MSG: "Your repair request has been completed!",
+                NOTIF_REPAIR_PENDING_MSG: "Your repair request status has been changed to pending.",
+                
+                // 為了讓「已經存入資料庫」的舊中文通知也能變成英文：
+                "損壞報修狀態更新": "Repair Status Update",
+                "您的損壞報修已被管理員受理，目前正在派工維修中。": "Your repair request has been accepted and is currently being assigned for repair.",
+                "您的損壞報修已經完成維修作業！": "Your repair request has been completed!",
+                "您的損壞報修狀態已變更為等待處理。": "Your repair request status has been changed to pending.",
+                
+                announcements_title: "Latest Dorm Announcements",
+                loading_announcements: "Loading...",
+                no_announcements: "No recent announcements at the moment.",
+                err_load_announcements: "Failed to load announcements. Please try again later.",
+                original_link: "Original Website Link (Click)",
+                default_modal_title: "Dorm Announcement",
+                internal_announcements_title: "Important Announcements",
+              },
+            },
+            zh: {
+              translation: {
+                sys_notice: "系統通知", sys_confirm: "確認操作", btn_ok: "確定",
+                login_student_title: "學生登入", login_admin_title: "管理員登入", login_admin_register_title: "管理員註冊",
+                login_btn: "登入", signup_btn: "註冊", no_admin_account: "沒有管理員帳號？ ", already_have_account: "已經有帳號了？ ",
+                enter_student_id: "請輸入您的學號", enter_admin_email: "請輸入管理員信箱", enter_password: "請輸入密碼",
+                enter_admin_name: "請輸入管理員名稱", req_admin_reg: "管理員註冊必填", admin_email: "管理員信箱",
+                dormitory_management_system: "宿舍管理系統", dorm_system: "宿舍系統", title: "宿舍管理系統",
+                student: "學生", admin: "管理員", student_id: "學號", student_id_account: "學號帳號", password: "密碼",
+                new_password: "新密碼", confirm_password: "確認密碼", confirm_new_password: "確認新密碼", current_password: "目前密碼",
+                admin_name: "管理員名稱", admin_secret_key: "管理員密鑰", login: "登入", logout: "登出", home: "首頁",
+                dashboard: "儀表板", packages: "我的包裹", settings: "設定", faq: "常見問題", frequently_asked_questions: "常見問題",
+                notifications: "通知", user: "使用者", active_packages: "未領取包裹", get_help: "查看說明", tracking_number: "物流單號",
+                courier_company: "物流公司", select_company: "選擇公司", t_cat: "黑貓宅急便", pelican: "台灣宅配通", hsinchu: "新竹物流",
+                kerry: "嘉里大榮物流", post: "中華郵政", shopee_express: "蝦皮店到店 / Shopee", express: "即時快遞服務", other: "其他", 
+                arrived: "已到達", received: "已領取",
+                registered: "已登記", name: "姓名", room_bed_number: "房號 / 床號", phone_number: "電話", action_required: "需要操作",
+                functions: "功能選單", admin_functions: "管理功能", mark_as_read: "標示為已讀", my_packages: "我的包裹", welcome: "歡迎", room_label: "房號",
+                bed_label: "床號", btn_next: "下一步", btn_back: "返回", btn_register: "登記", btn_cancel: "取消", profile_info: "個人資料",
+                editable_info: "可修改資料", change_password: "修改密碼", btn_request_change: "申請更改", btn_update: "更新",
+                btn_change_password: "確認修改", forgot_password: "忘記密碼？",
+                faq_all: "全部", faq_checkin: "入退宿相關", faq_facilities: "設施報修", faq_life: "生活與規範",
+                faq_network: "網路與水電", tracking: "物流單號", registered_on: "登錄日期", no_packages: "目前沒有包裹紀錄",
+                
+                address_guide_title: "📦 宿舍包裹寄件資訊", address_no_reg: "無需註冊包裹代收",
+                address_step1: "步驟 1: 寄貨時填寫正確地址(箭頭點開)", address_guide_desc: "請依您住宿的棟別填寫，格式如下（請將 0000 室、000 換成您的房號與姓名）：",
+                address_a: "住宿 A 棟：嘉義縣民雄鄉三興村 161 號（學士班宿舍 0000 室 000 收）", address_b: "住宿 B 棟：嘉義縣民雄鄉三興村 162 號（學士班宿舍 0000 室 000 收）",
+                address_c: "住宿 C 棟：嘉義縣民雄鄉三興村 163 號（學士班宿舍 0000 室 000 收）", address_d: "住宿 D 棟：嘉義縣民雄鄉三興村 164 號（學士班宿舍 0000 室 000 收）",
+                address_e: "住宿 E 棟：嘉義縣民雄鄉三興村 165 號（學士班宿舍 0000 室 000 收）",
+                address_step2: "步驟 2: 包裹到達後顯示於下方的已到達欄位", address_step3: "步驟 3: 前往學士班宿舍管理室領取包裹(說出手機後三碼)",
+                inquire_btn: "❓包裹未顯示?發送詢問", inquiry_modal_title: "發送包裹詢問", inquiry_desc: "若您在購物平台收到包裹送達通知，但宿舍系統內未顯示，請提交詢問給管理員確認。",
+                enter_tracking: "輸入單號", inquiry_submit: "送出詢問",
+
+                venue_big_ab1: "大AB1", venue_small_ab1: "小AB1", venue_big_cb1: "大CB1", venue_small_cb1: "小CB1",
+                venue_cd_stairs: "CD棟前近樓梯處(限借桌1張、椅2張)", venue_eb1_space: "EB1前空地", venue_other: "其他場地：",
+                facility_rental: "場地租借", apply_club: "申請社團/系級", pic_name: "負責人", 
+                activity_name: "活動名稱 (含用途說明)", contact_phone: "聯絡電話", borrow_date: "借用日期",
+                attendees: "參加人數", time_slot: "借用時段", venue: "場地", other_venue: "其他場地名稱",
+                btn_fill_facility: "填寫場地申請表 (點開)",
+                btn_submit_rental: "送出申請", rental_history: "申請紀錄", rental_note: "(當申請結果通過, 請在活動前兩小時至管理室領取鑰匙並抵押證件)",
+                status: "狀態", reason: "原因", status_pending: "申請中", status_approved: "已核准", status_rejected: "被拒絕",
+                time_morning: "上午 (08:00-12:00)", time_afternoon: "下午 (13:00-17:00)", 
+                time_evening: "晚上 (18:00-22:00)", time_fullday: "全天 (08:00-22:00)", facility_conflict: "場地時段衝突！該場地的這個時段已被借用或申請中。",
+
+                nav_repair: "損壞報修", nav_repair_admin: "損壞報修管理", repair_form_title: "申請損壞報修",
+                btn_fill_repair: "填寫報修申請表 (點開)",
+                repair_item: "申請維修項目", repair_indoor: "室內", repair_public: "公共設施", repair_desc: "損壞情形 (限最多50字)",
+                repair_desc_placeholder: "請簡述損壞情況...", repair_presence_title: "是否需要本寢室住宿學生在場始可施行維修？",
+                repair_presence_no: "不需要", repair_presence_yes: "需要 (請至管理室一趟預約維修時間)", btn_preview_repair: "填寫完畢，預覽確認資料", repair_history_title: "報修歷史紀錄",
+                date: "日期", applicant_info: "申請人資訊", repair_details: "維修項目/損壞情形", presence_req: "在場要求",
+                btn_submit_repair: "確認送出", repair_confirm_title: "確認報修資料",
+
+                NOTIF_ROOM_APPROVED_TITLE: "房號更改已批准", NOTIF_ROOM_APPROVED_MSG: "您的房號已成功更新為 {{room}} (床位 {{bed}})。",
+                NOTIF_ROOM_DECLINED_TITLE: "房號更改已拒絕", NOTIF_ROOM_DECLINED_MSG: "您的房號更改申請已被管理員拒絕。",
+                NOTIF_PKG_REG_TITLE: "包裹已登記", NOTIF_PKG_REG_MSG: "單號: {{tracking}}",
+                NOTIF_PKG_ARR_TITLE: "包裹已到達宿舍", NOTIF_PKG_ARR_MSG: "單號 {{tracking}} 的包裹已到達。領取請核對電話後三碼。",
+                NOTIF_PKG_REC_TITLE: "包裹已領取", NOTIF_PKG_REC_MSG: "單號 {{tracking}} 的包裹已被領取。",
+                NOTIF_PKG_NOT_FOUND_TITLE: "包裹詢問回覆: 未收到", NOTIF_PKG_NOT_FOUND_MSG: "管理室回覆：單號 {{tracking}} 的包裹目前尚未送達宿舍。",
+                NOTIF_NONE: "目前沒有通知",  NOTIF_PKG_NEW_TITLE: "📦 您有新包裹！", NOTIF_PKG_NEW_MSG: "您的包裹已送達管理室，請盡快前往領取。",
+                NOTIF_FAC_APPROVED_TITLE: "場地租借已核准", NOTIF_FAC_APPROVED_MSG: "您申請的 {{date}} {{venue}} 借用已獲批准。",
+                NOTIF_FAC_DECLINED_TITLE: "場地租借已拒絕", NOTIF_FAC_DECLINED_MSG: "您申請的 {{date}} {{venue}} 借用已被拒絕。原因：{{reason}}",
+                
+                err_login: "帳號或密碼錯誤！",
+                err_email_used: "此 Email 已被註冊，請直接登入。",
+                err_no_presence: "請勾選是否需要在場",
+                msg_repair_submitted: "報修申請已成功送出！請隨時查看歷史紀錄了解維修進度。",
+                msg_fac_submitted: "申請已成功送出！\n\n提示：如果狀態顯示通過，請記得在租借時間前兩個小時去管理室借鑰匙。",
+                msg_room_submitted: "房號更改申請已送出！請靜候管理員審核。",
+                msg_inquiry_submitted: "詢問已送出！請靜候管理員回覆。",
+                confirm_logout: "確定要登出嗎？",
+                confirm_clear_notif: "確定要刪除所有通知嗎？",
+                confirm_pkg_received: "確定標記包裹為【已領取】嗎？",
+                confirm_pkg_revert: "確定要撤銷領取，將包裹狀態改回【已到達】嗎？\n(適用於不小心按錯的情況)",
+                confirm_inquiry_received: "確定標記為【確實已收到】嗎？\n(這會自動將此包裹加入「已到達」清單，並發送通知給該學生)",
+                confirm_inquiry_not_found: "確定標記為【尚未送達】嗎？\n(這會發送通知告訴學生管理室還沒收到)",
+                confirm_approve_fac: "確定要核准這筆場地借用嗎？",
+                confirm_approve_room: "確定要批准這位學生的房號更改申請嗎？",
+                confirm_reject_room: "確定要拒絕這位學生的房號更改申請嗎？",
+
+                faq_q1: "我下學期不續住宿舍，需要辦什麽手續流程？", faq_a1: "請於 即日起至 115年1月4日 16:00 前，上網至學務處網站下載「不續住申請書」，填寫完畢後交至 C 棟服務中心 辦理登錄。若未依規定辦理，將視同續住原寢室。",
+                faq_q2: "我現在要退宿，需要做什麽手續流程？", faq_a2: "請至宿舍管理室填寫相關手續，才清空房間，歸還鑰匙。",
+                faq_q3: "期中退宿會退回部分費用嗎？", faq_a3: "會。要看同學是什麽階段退宿，第一學期(114/10/17達1/3基準日，114/11/28達2/3基準日)，第二學期(115/04/01達1/3基準日，115/05/15達2/3基準日)，請在上班時間早上9點-下午4點至宿舍管理室跟管理員溝通。",
+                faq_q4: "期中可以退宿嗎？", faq_a4: "可以，需要去管理室做相關手續，清空房間，並歸還鑰匙。",
+                faq_q5: "寒假要住宿需要做什麽手續流程？", faq_a5: "不需要。公告指出 114學年度第1學期住宿生在寒假「不需再提出申請」，可留宿且不需辦理退宿，直接續住原寢室。",
+                faq_q6: "寒假不住宿需要做什麽手續流程？", faq_a6: "需在 114年12月12日 至 12月31日 截止前，至管理室申請「寒假不住宿」，才能依規定辦理退費。",
+                faq_q7: "寒假現在還有開放營隊可以申請住宿嗎？", faq_a7: "沒有。公告明確指出「114學年度起學士班宿舍寒假營隊不開放申請住宿」，因為無空房提供。",
+                faq_q8: "寒假不住宿需要注意什麽事項？", faq_a8: "-需在 12月31日 前完成申請。\n-需於 115年1月13日 10:00 前 辦理退宿。\n-寒假期間 不開放 交誼廳寄放個人物品，違者將視為廢棄物處理。",
+                faq_q9: "寒假住宿什麽時候開始？", faq_a9: "自 115年1月13日 起。",
+                faq_q10: "寒假住宿什麽時候結束？", faq_a10: "至 115年2月9日 止。",
+                faq_q11: "寒假不住宿退費會退去哪裏？", faq_a11: "退費會轉賬去你學籍系統填寫的金融單位賬戶裏。",
+                faq_q12: "寒假不住宿申請時間？", faq_a12: "自 114年12月12日 起至 114年12月31日 截止。",
+                faq_q13: "有住寒假住宿但下學期不續住，什麽時候辦理退宿手續？", faq_a13: "請於 115年2月9日 10:00 前 辦理完成退宿手續。",
+                faq_q14: "有住寒假住宿但下學期不續住的退宿手續逾期了會怎樣?", faq_a14: "逾期未退宿者，將依住宿法規處理，並依規定收繳每日 130元 的住宿費（以保證金扣繳）。",
+                faq_q15: "錯過寒假退宿申請時間可以繼續申請嗎？", faq_a15: "請在上班時間(早上9點-下午4點)至宿舍管理室一趟跟管理員溝通。",
+                faq_q16: "114年第2學期/下學期什麽時候入住？", faq_a16: "於 115年2月13日 10:00 開始辦理進住。",
+                faq_q17: "下學期不住宿什麽時候申請?", faq_a17: "即日起至 115年1月4日 16:00 前。",
+                faq_q18: "宿舍床位申請的時間是什麽時候？", faq_a18: "開放報名時間自 114年12月15日（一）上午12時起 至 114年12月30日（二）下午17時止。",
+                faq_q19: "宿舍床位申請去哪裏報名？", faq_a19: "網址：https://www026186.ccu.edu.tw/dormapply/",
+                faq_q20: "碩士班和博士班也是照這個時間和方式申請嗎?", faq_a20: "不是。碩博士班住宿分配維持原方式，由各系所自行分配運用。",
+                faq_q21: "宿舍床位什麽時候會抽籤？我需要親自到場嗎？", faq_a21: "預訂於 114年12月31日 的「床位分配說明會」中實施抽籤。報名者 不需要到場。",
+                faq_q22: "我要怎麽知道我有沒有抽中宿舍？", faq_a22: "可於抽籤日之 隔日（即 115年1月1日後）登入「學士班宿舍管理系統」查詢。",
+                faq_q23: "如果我有疑問可以問誰？", faq_a23: "學務處生活事務組，分機 12102。\n學士班宿舍服務中心，分機 73399。\n電表室，分機 75595 (每週一至五 18-21時)",
+                faq_q24: "退宿搬家開車進校園，停車費怎麽算？", faq_a24: "30分鐘內離場免收費；逾30分鐘則依規定繳納場地清潔維護費 100元/次。",
+                faq_q25: "宿舍這邊可以拿停車折抵劵嗎？", faq_a25: "不可以。學生宿舍不提供停車費折抵券。",
+                faq_q26: "下學期(114學年度下學期)的網路/宿網什麽時候可以申請？", faq_a26: "2月20日 起開放申請。",
+                faq_q27: "寒暑假的網路和學期中的不一樣嗎？什麽時候切換?", faq_a27: "是不一樣的。\n寒假網路：1月5日起申請，1月13日 上午10:00 切換。\n下學期網路：2月20日起申請，2月21日 上午10:00 切換。",
+                faq_q28: "申請完什麽時候能用？", faq_a28: "有線網路申請後 30分鐘 即可使用；無線網路需 繳費後 才能使用。",
+                faq_q29: "如果忘記繳費會被斷網嗎？", faq_a29: "會。3月9日 上午10:00 起，已申請但未繳費者將予斷線。",
+                faq_q30: "寒假不住宿可以申請退費嗎？", faq_a30: "可以。依據公告，114學年度第1學期住宿費包含預繳寒假住宿費，若寒假期間不住宿，請至管理室申請退費。",
+                faq_q31: "寒假期間可以把行李放在交誼廰嗎？", faq_a31: "不可以。公告特別註明「第一學期末及寒假期間，均不開放各棟交誼廳供同學寄放個人物品」，違者依廢棄物處理。",
+                faq_q32: "下學期(114學年度下學期)什麽時候可以搬回來住/回來住？", faq_a32: "115年2月13日 上午10:00 開始辦理進住。",
+                faq_q33: "宿舍電費(公用電)大概多少錢？", faq_a33: "依據 E 棟 114年11月的核算表範例，該月每人公用電費總金額約為 45元。",
+                faq_q34: "在學期中可以更換房間嗎？要怎麽做？", faq_a34: "可以，需要有合理的理由，例如與室友作息不合。請至宿舍管理室跟管理員溝通並填寫相關手續。",
+                faq_q35: "如何申請繼續住宿？", faq_a35: "第一學期有住宿，未申請第二學期不續住，就可以繼續第二學期住宿。",
+                faq_q36: "宿舍服務中心服務時間及連絡方式？", faq_a36: "服務時間：全天 24 小時服務學生，全年僅春節年假期間暫停服務。\n(一)學士班宿舍：05-2721422 轉 73399 (dormcol@ccu.edu.tw)\n(二)碩博士班宿舍：05-2721422 轉 82121 (admkwc@ccu.edu.tw)",
+                faq_q37: "宿舍收費金額多少？如何繳交？", faq_a37: "收費金額請參閱本校網頁。繳費請至台灣銀行學雜費入口網站列印個人住宿費繳費單，依說明繳交費用。",
+                faq_q38: "宿舍維修申報？", faq_a38: "請登入Ecourse的維修申請系統去申請報修。若為急迫修繕事項，請逕以電話連繫宿舍服務中心處理(分機 73399)。",
+                faq_q39: "信件、包裏如何寄至宿舍？", faq_a39: "學士班A-E棟收件地址為民雄鄉三興村 161-165號 (需註明房號及姓名)；碩博士班為大學路168號。大型或需付費包裹由送貨員聯絡學生自取，無法收件可至服務中心填「代收委託單」(冷凍冷藏拒收)。",
+                faq_q40: "宿舍夜間醫護站？", faq_a40: "設於學士班宿舍 C 棟地下 1 樓，每日下午 6 點至 10 點由大林慈濟醫院派員提供緊急醫護處理與諮詢。",
+                faq_q41: "若有親友來訪，可否進入寢室內？如果有空床位，是否可以讓親友留宿？", faq_a41: "不可擅自帶入寢室內，更不可留宿或使用浴室。訪客應於大廳會客，若必須進入寢室應徵得室友同意，並登記換證、穿訪客背心。",
+                faq_q42: "校園內(宿舍區)可以使用何種交通工具、如何申請車證？", faq_a42: "1. 可使用腳踏車、電動自行車、汽車，不開放機車進入校園。\n2. 汽機車請向總務處車管中心申請停車證。\n3. 機車(含電動)僅能停放校門及側門機車停車場。",
+                faq_q43: "宿舍電費？", faq_a43: "1. 各寢室獨立電表，每月依台電住宅費率計價。\n2. 公共用電由住校生與校方各分攤 50%。\n3. 電表辦公室在 C 棟 1 樓大廳。\n4. 進住前需繳交「預繳電費」，學期結束多退少補。",
+                faq_q44: "有推車可以借嗎？", faq_a44: "有，租借時間為早上10點至晚上10點，在管理室填寫相關資料並抵押證件方可借用推車。",
+                faq_q45: "如果發現公共設施損壞，要怎麽辦？", faq_a45: "請同學去宿舍管理室通知管理員，或者在Ecourse維修申請系統申請維修(注明是公共設施)。",
+                faq_q46: "如果沒有抽中宿舍，或者忘記抽籤宿舍，可以申請二次替補/遞補嗎？", faq_a46: "可以，一般在新學年快開學的時候公告，到時候請同學至管理室填寫相關資料。問題請連繫宿舍服務中心(分機 73399)。",
+                faq_q47: "洗衣機/烘乾機/販賣機吃錢，可以退回嗎？", faq_a47: "可以，請至宿舍管理室一趟，通知哪個機器(有編號)壞掉，並留下個人資料方便退還費用。",
+                faq_q48: "申請退宿后如果反悔還能再取消退宿嗎？", faq_a48: "請在上班時間至宿舍管理室一趟確認資料並跟管理員溝通。",
+                faq_q49: "什麽是二次遞補？", faq_a49: "如果有剩下的床位，將幫同學安排該床位，不能自己選床位。",
+                faq_q50: "大五想住宿要怎麽辦理？", faq_a50: "只能以二次遞補的方式處理。",
+                faq_q51: "第一學期有住宿，第二學期需要重新抽籤嗎？", faq_a51: "第一學期同學已經有床位了，第二學期不需要再重新抽籤，住回原本的床位。",
+                
+                nav_laundry: "洗/烘衣機狀態",
+                force_pwd_desc: "為了安全起見，請在繼續之前設定新密碼。",
+                btn_update_password: "更新密碼",
+                laundry_building: "頁面建置中...",
+                laundry_desc: "這裡未來將顯示各樓層洗/烘衣機的使用狀態與倒數時間。",
+                no_repair_history: "您目前無報修紀錄",
+                no_facility_history: "無申請紀錄",
+                repair_status_pending: "等待處理",
+                repair_status_in_progress: "派工維修中",
+                repair_status_completed: "已完成維修",
+                repair_presence_yes_short: "需要",
+                repair_presence_no_short: "不需要",
+                time_just_now: "剛剛",
+                time_mins_ago: "{{count}} 分鐘前",
+                time_hours_ago: "{{count}} 小時前",
+                time_days_ago: "{{count}} 天前",
+                lbl_name: "名字",
+                lbl_student_id: "學號",
+                lbl_phone: "電話號碼",
+                lbl_room_bed: "房號/床號",
+                lbl_repair_item: "維修項目",
+                lbl_damage_desc: "損壞情形",
+                lbl_presence_req: "在場要求",
+                lbl_requested_at: "申請時間",
+                laundry_select_location: "選擇區域：",
+                laundry_loc_de: "DE棟",
+                laundry_loc_c: "C棟",
+                laundry_loc_a: "A棟",
+                laundry_washer: "洗衣機",
+                laundry_dryer: "烘衣機",
+                laundry_available: "可使用",
+                laundry_in_use: "運轉中",
+                laundry_mins_left: "分鐘剩餘",
+                laundry_loading: "正在同步即時資料...",
+                laundry_error: "取得資料失敗，請稍後再試。",
+                laundry_finished: "運轉結束",
+                laundry_offline: "未知/離線",
+                laundry_washers_sec: "洗衣機區",
+                laundry_building_title: "{{building}}洗衣部",
+                laundry_dryers_sec: "烘衣機區",
+                laundry_started_at: "開始於 {{time}}",
+                laundry_notify_washer: "🔔有空洗衣機通知我",
+                laundry_notify_dryer: "🔔有空烘衣機通知我",
+                laundry_sub_success: "已開啟通知！系統偵測到空機時將自動發送通知給您。",
+                NOTIF_LAUNDRY_TITLE: "洗/烘衣機有空機囉！",
+                NOTIF_LAUNDRY_MSG: "您關注的 {{location}} 已經有空的 {{type}} 可以使用囉！快去洗衣吧！",
+                laundry_not_full_washer: "目前還有空的洗衣機，可以直接前往使用喔！",
+                laundry_not_full_dryer: "目前還有空的烘衣機，可以直接前往使用喔！",
+                loading_btn: "載入中...",
+                pending_count: "處理/審核中：",
+                ai_assistant: "AI 小助理",
+                ai_assistant_desc: "解答關於宿舍的問題",
+                ai_loading_msg: "AI 助理正在載入中，請稍候...",
+                reject_title: "拒絕申請原因",
+                reject_select_reason: "請選擇拒絕原因",
+                reject_placeholder: "請選擇...",
+                reject_rented: "已租借給其他單位",
+                reject_maintenance: "場地維修",
+                reject_closed: "場地不開放",
+                reject_other: "其他",
+                reject_other_label: "其他原因",
+                btn_confirm_reject: "確認拒絕",
+                forgot_pwd_alert: "請攜帶「學生證」至學士班宿舍管理室一趟，由管理員親自核對身分後，將協助您重置密碼！",
+                NOTIF_REPAIR_UPDATE_TITLE: "🔧 損壞報修狀態更新",
+                NOTIF_REPAIR_IN_PROGRESS_MSG: "您的損壞報修已被管理員受理，目前正在派工維修中。",
+                NOTIF_REPAIR_COMPLETED_MSG: "您的損壞報修已經完成維修作業！",
+                NOTIF_REPAIR_PENDING_MSG: "您的損壞報修狀態已變更為等待處理。",
+                
+                announcements_title: "宿舍最新公告",
+                loading_announcements: "載入中...",
+                no_announcements: "目前無最新公告",
+                err_load_announcements: "無法載入公告，請稍後再試",
+                original_link: "原網站連結(點擊)",
+                default_modal_title: "宿舍公告",
+                internal_announcements_title: "重要公告通知",
+              },
+            },
+          },
+        },
+        function () {
+          updateContent();
+          if (typeof window.filterFAQ === 'function') {
+            window.filterFAQ('all');
+          }
+        }
+      );
+
+      function updateContent() {
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          el.innerText = i18next.t(el.getAttribute("data-i18n"));
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          el.placeholder = i18next.t(el.getAttribute("data-i18n-placeholder"));
+        });
+      }
+
+      function changeLanguage(lang) {
+        i18next.changeLanguage(lang);
+        updateContent();
+        if (typeof window.reRenderCurrentPackages === "function") window.reRenderCurrentPackages();
+        if (typeof window.renderNotifications === "function") window.renderNotifications();
+        if (typeof window.loadUserFacilityRequests === "function") window.loadUserFacilityRequests();
+        if (typeof window.loadAdminFacilityRequests === "function") window.loadAdminFacilityRequests();
+        if (typeof window.loadAdminFacilitySchedule === "function") window.loadAdminFacilitySchedule();
+        if (typeof window.loadUserRepairRequests === "function") window.loadUserRepairRequests();
+        if (typeof window.loadAdminRepairRequests === "function") window.loadAdminRepairRequests();
+        if (typeof window.loadLaundryData === "function" && document.getElementById("laundryUserPage").style.display !== "none") {
+          window.loadLaundryData();
+        }
+      }
+
+      window.updateContent = updateContent;
+
+      function toggleTheme() {
+        const body = document.body;
+        body.classList.toggle('dark-mode');
+        const isDark = body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateThemeIcon(isDark);
+      }
+
+      function updateThemeIcon(isDark) {
+        document.querySelectorAll('.theme-icon').forEach(icon => {
+          icon.src = isDark ? './images/lightmode.png' : './images/darkmode.png'; 
+        });
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+          document.body.classList.add('dark-mode');
+          updateThemeIcon(true);
+        } else {
+          updateThemeIcon(false);
+        }
+      });
+      
+      window.toggleTheme = toggleTheme;
+    </script>
+  </body>
+</html>
