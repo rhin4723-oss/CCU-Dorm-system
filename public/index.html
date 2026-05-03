@@ -1673,8 +1673,14 @@
       window.toggleTheme = toggleTheme;
     </script>
     <script>
-      lucide.createIcons();
-    </script>
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      } else {
+        console.error("Lucide 載入失敗，請檢查網路或 CDN 連結");
+      }
+    });
+  </script>
   </body>
   </body>
 </html>
