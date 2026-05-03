@@ -1,36 +1,47 @@
-const express = require('express');
-const cors = require('cors');
-const admin = require('firebase-admin');
-const path = require('path');
-const fs = require('fs');             // <--- ADD THIS LINE
-const axios = require('axios');       // <--- ADD THIS LINE
-const cheerio = require('cheerio');   // <--- ADD THIS LINE
-const https = require('https');       // <--- ADD THIS LINE
+const admin = require("firebase-admin");
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const fs = require("fs");
+const axios = require("axios");
+const cheerio = require("cheerio");
+const https = require("https");
 
-const PORT = process.env.PORT || 3000;
-const app = express();
-
-// ... the rest of your Firebase initialization and routes
-
-// --- Firebase Initialization ---
-let serviceAccount;
-if (process.env.FIREBASE_KEY) {
-    serviceAccount = JSON.parse(process.env.FIREBASE_KEY.trim());
-} else {
-    serviceAccount = require('./serviceAccountKey.json');
-}
-
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+process.on("uncaughtException", (err) => {
+  console.error("🔥 伺服器發生致命錯誤:", err);
 });
 
-const db = admin.firestore(); // <--- ADDED: Crucial! Without this, your database queries will crash.
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-// --- Middleware ---
+// --- 1. 安全性檢查：確認金鑰是否存在 ---
+const serviceAccountPath = path.join(__dirname, "serviceAccountKey.json");
+
+if (!fs.existsSync(serviceAccountPath)) {
+  console.error("❌ 嚴重錯誤：找不到 serviceAccountKey.json 檔案！");
+  process.exit(1);
+}
+
+let serviceAccount;
+try {
+  serviceAccount = require(serviceAccountPath);
+} catch (error) {
+  console.error("❌ 金鑰檔案格式錯誤 (JSON Error):", error.message);
+  process.exit(1);
+}
+
+// 初始化 Firebase Admin
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+}
+
+const db = admin.firestore();
+
+// --- 2. Middleware 設定 ---
 app.use(cors());
 app.use(express.json());
-
-// Rest of your routes...
 
 // --- 通用通知函數 ---
 async function createNotification(receiver, type, titleKey, messageKey, params) {
