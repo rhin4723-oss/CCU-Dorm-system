@@ -16,7 +16,7 @@
     "serve": "11.2.0"
   },
   "dependencies": {
-    "axios": "^1.13.6",
+    "axios": "^1.16.0",
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
