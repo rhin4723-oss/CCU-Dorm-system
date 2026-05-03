@@ -23,20 +23,30 @@ if (!fs.existsSync(serviceAccountPath)) {
 }
 
 let serviceAccount;
-try {
-  serviceAccount = require(serviceAccountPath);
-} catch (error) {
-  console.error("❌ 金鑰檔案格式錯誤 (JSON Error):", error.message);
-  process.exit(1);
+
+if (process.env.FIREBASE_KEY) {
+    try {
+        // 讀取 Railway 上的環境變數
+        serviceAccount = JSON.parse(process.env.FIREBASE_KEY.trim());
+        console.log("✅ 成功讀取並解析 Railway 環境變數 FIREBASE_KEY");
+    } catch (err) {
+        console.error("❌ 解析 FIREBASE_KEY 失敗:", err.message);
+        process.exit(1);
+    }
+} else {
+    try {
+        // 本地端測試時使用實體檔案
+        serviceAccount = require('./serviceAccountKey.json');
+        console.log("✅ 成功讀取本地 serviceAccountKey.json 檔案");
+    } catch (err) {
+        console.error("❌ 嚴重錯誤：找不到 serviceAccountKey.json 檔案！");
+        process.exit(1);
+    }
 }
 
-// 初始化 Firebase Admin
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
-
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 const db = admin.firestore();
 
 // --- 2. Middleware 設定 ---
