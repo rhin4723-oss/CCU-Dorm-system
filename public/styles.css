@@ -121,6 +121,10 @@ body {
   border: 1px solid #f3f4f6;
 }
 
+.theme-icon {
+  pointer-events: none; /* 讓點擊穿透圖示 */
+}
+
 .notification-panel.show {
   display: block;
   animation: slideDown 0.2s ease-out;
