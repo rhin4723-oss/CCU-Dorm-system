@@ -119,7 +119,7 @@
           </h1>
           <div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 6px;">
             <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px; background: rgba(255,255,255,0.9); border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;" onclick="toggleTheme()">
-              <img class="theme-icon" src="./images/darkmode.png" style="width: 20px; height: 20px;" alt="切換主題" />
+              <img class="theme-icon" src="/images/darkmode.png" style="width: 20px; height: 20px;" alt="切換主題" />
             </button>
 
             <div style="display: flex; gap: 8px;">
@@ -151,7 +151,7 @@
                 <div style="position: relative; width: 100%">
                   <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" data-i18n-placeholder="enter_password" required style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
                   <span id="loginPwdIcon" onclick="togglePasswordVisibility('loginPassword', 'loginPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
-                    <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                    <img src="/images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
                   </span>
                 </div>
               </div>
@@ -166,7 +166,7 @@
                   <div style="position: relative; width: 100%">
                     <input type="password" class="form-input" id="adminSecret" placeholder="Required for admin registration" data-i18n-placeholder="req_admin_reg" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
                     <span id="adminSecretIcon" onclick="togglePasswordVisibility('adminSecret', 'adminSecretIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
-                      <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                      <img src="/images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
                     </span>
                   </div>
                 </div>
@@ -215,7 +215,7 @@
             <div style="position: relative; width: 100%">
               <input type="password" id="forceNewPassword" class="form-input" required minlength="6" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
               <span id="forceNewPwdIcon" onclick="togglePasswordVisibility('forceNewPassword', 'forceNewPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
-                <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                <img src="/images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
               </span>
             </div>
           </div>
@@ -224,7 +224,7 @@
             <div style="position: relative; width: 100%">
               <input type="password" id="forceConfirmPassword" class="form-input" required minlength="6" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
               <span id="forceConfirmPwdIcon" onclick="togglePasswordVisibility('forceConfirmPassword', 'forceConfirmPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
-                <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                <img src="/images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
               </span>
             </div>
           </div>
@@ -373,65 +373,65 @@
           <div class="student-only" data-i18n="functions" style="color: #9ca3af; font-size: 12px; font-weight: 600; padding: 12px 16px; margin-top: 20px; margin-bottom: 8px;">FUNCTIONS</div>
           
           <div id="nav-dashboard" class="sidebar-menu-item student-only" onclick="showPage('dashboard', event)">
-            <span><img src="./images/home.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/home.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="home"></span>
           </div>
           <div id="nav-packageUser" class="sidebar-menu-item student-only" onclick="showPage('packageUser', event)">
-            <span><img src="./images/package.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/package.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="packages"></span>
           </div>
           <div id="nav-laundryUser" class="sidebar-menu-item student-only" onclick="showPage('laundryUser', event)">
-            <span><img src="./images/washdry.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/washdry.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="nav_laundry">洗/烘衣機狀態</span>
           </div>
           <div id="nav-repairUser" class="sidebar-menu-item student-only" onclick="showPage('repairUser', event)">
-            <span><img src="./images/fix.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/fix.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="nav_repair">損壞報修</span>
           </div>
           <div id="nav-facilityUser" class="sidebar-menu-item student-only" onclick="showPage('facilityUser', event)">
-            <span><img src="./images/rental.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/rental.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="facility_rental">場地租借</span>
           </div>
           <div id="nav-faq" class="sidebar-menu-item student-only" onclick="showPage('faq', event)">
-            <span><img src="./images/faq.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/faq.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="faq"></span>
           </div>
 
           <div class="admin-only" data-i18n="admin_functions" style="display: none; color: #9ca3af; font-size: 12px; font-weight: 600; padding: 12px 16px; margin-top: 20px; margin-bottom: 8px;">管理功能</div>
 
           <div class="sidebar-menu-item admin-only" id="nav-packageAdmin" style="display: none; margin-top: 10px" onclick="showPage('packageAdmin', event)">
-            <span><img src="./images/package.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/package.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span>包裹管理</span>
             <span id="adminPackageBadge" style="display: none; margin-left: auto; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0</span>
           </div>
           <div class="sidebar-menu-item admin-only" id="nav-repairAdmin" style="display: none" onclick="showPage('repairAdmin', event)">
-            <span><img src="./images/fix.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/fix.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="nav_repair_admin">損壞報修管理</span>
             <span id="adminRepairBadge" style="display: none; margin-left: auto; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0</span>
           </div>
           <div class="sidebar-menu-item admin-only" id="nav-facilityAdmin" style="display: none" onclick="showPage('facilityAdmin', event)">
-            <span><img src="./images/rental.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/rental.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span>場地租借</span>
             <span id="adminFacilityBadge" style="display: none; margin-left: auto; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0</span>
           </div>
           <div class="sidebar-menu-item admin-only" id="nav-studentAccountAdmin" style="display: none" onclick="showPage('studentAccountAdmin', event)">
-            <span><img src="./images/admin.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/admin.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span>學生帳號</span>
             <span id="adminStudentAccountBadge" style="display: none; margin-left: auto; background: #ef4444; color: white; font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">0</span>
           </div>
           <div class="sidebar-menu-item admin-only" id="nav-annAdmin" style="display: none" onclick="showPage('annAdmin', event)">
-  <span><img src="./images/announcement.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+  <span><img src="/images/announcement.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
   <span>公告管理</span>
 </div>
 
           <div style="flex: 1"></div>
           
           <div id="nav-settings" class="sidebar-menu-item student-only" onclick="showPage('settings', event)">
-            <span><img src="./images/settings.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/settings.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="settings"></span>
           </div>
           <div class="sidebar-menu-item" onclick="logout()">
-            <span><img src="./images/logout.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
+            <span><img src="/images/logout.png" style="width: 20px; height: 20px; filter: brightness(0) invert(1);" /></span>
             <span data-i18n="logout"></span>
           </div>
         </div>
@@ -454,7 +454,7 @@
             <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
               <div style="position: relative">
                 <button class="btn btn-secondary" id="topNavNotificationBtn" style="padding: 10px 16px; position: relative; height: 46px; display: flex; align-items: center; justify-content: center;" onclick="toggleNotifications()">
-                  <img src="./images/notifications.png" style="width: 20px; height: 20px; object-fit: contain" alt="Notifications" />
+                  <img src="/images/notifications.png" style="width: 20px; height: 20px; object-fit: contain" alt="Notifications" />
                   <span class="notification-badge" id="notificationBadge">0</span>
                 </button>
                 <div class="notification-panel" id="notificationPanel">
@@ -463,7 +463,7 @@
                     <div style="display: flex; gap: 8px;">
                       <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 12px" onclick="markAllRead()"><span data-i18n="mark_as_read">Mark As Read</span></button>
                       <button class="btn btn-secondary" style="padding: 4px 8px; display: flex; align-items: center;" onclick="clearAllNotifications()" title="Delete All Notifications">
-                        <img src="./images/delete.png" style="width: 14px; height: 14px; opacity: 0.8;" alt="Delete All" id="deleteAllIcon" />
+                        <img src="/images/delete.png" style="width: 14px; height: 14px; opacity: 0.8;" alt="Delete All" id="deleteAllIcon" />
                       </button>
                     </div>
                   </div>
@@ -472,7 +472,7 @@
               </div>
 
               <button class="btn btn-secondary" onclick="toggleTheme()" style="padding: 10px 16px; font-size: 18px; height: 46px; display: flex; align-items: center; justify-content: center;">
-                <img class="theme-icon" src="./images/darkmode.png" style="width: 24px; height: 24px;" alt="切換主題" />
+                <img class="theme-icon" src="/images/darkmode.png" style="width: 24px; height: 24px;" alt="切換主題" />
               </button>
             </div>
           </div>
@@ -521,7 +521,7 @@
                 
                 <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="showPage('packageUser')">
                   <div style="margin-bottom: 12px">
-                    <img src="./images/packagesHOME.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                    <img src="/images/packagesHOME.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
                   </div>
                   <h3 style="margin-bottom: 8px"><span data-i18n="active_packages"></span></h3>
                   <p style="font-size: 32px; font-weight: 700; margin: 0;" id="activePackageCount">0</p>
@@ -529,7 +529,7 @@
                 
                 <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="toggleNotifications()">
                   <div style="margin-bottom: 12px">
-                    <img src="./images/notificationHOME.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                    <img src="/images/notificationHOME.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
                   </div>
                   <h3 style="margin-bottom: 8px"><span data-i18n="notifications"></span></h3>
                   <p style="font-size: 32px; font-weight: 700; margin: 0;" id="unreadCount">0</p>
@@ -537,7 +537,7 @@
                 
                 <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="showPage('faq')">
                   <div style="margin-bottom: 12px">
-                    <img src="./images/faq.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                    <img src="/images/faq.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
                   </div>
                   <h3 style="margin-bottom: 8px"><span data-i18n="faq"></span></h3>
                   <p style="font-size: 16px; margin: 0;"><span data-i18n="get_help"></span></p>
@@ -545,7 +545,7 @@
 
                 <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="showPage('repairUser')">
                   <div style="margin-bottom: 12px">
-                    <img src="./images/fix.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                    <img src="/images/fix.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
                   </div>
                   <h3 style="margin-bottom: 8px"><span data-i18n="nav_repair"></span></h3>
                   <p style="font-size: 32px; font-weight: 700; color: white; margin: 0; display: flex; align-items: baseline; gap: 8px;">
@@ -556,7 +556,7 @@
 
                 <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="showPage('facilityUser')">
                   <div style="margin-bottom: 12px">
-                    <img src="./images/rental.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                    <img src="/images/rental.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
                   </div>
                   <h3 style="margin-bottom: 8px"><span data-i18n="facility_rental"></span></h3>
                   <p style="font-size: 32px; font-weight: 700; color: white; margin: 0; display: flex; align-items: baseline; gap: 8px;">
@@ -567,7 +567,7 @@
 
                 <div class="card" style="background: rgba(44, 62, 80, 0.8); color: white; cursor: pointer;" onclick="openAIAssistant()">
                   <div style="margin-bottom: 12px">
-                    <img src="./images/robot.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
+                    <img src="/images/robot.png" style="width: 60px; height: 60px; filter: brightness(0) invert(1);" />
                   </div>
                   <h3 style="margin-bottom: 8px"><span data-i18n="ai_assistant"></span></h3>
                   <p style="font-size: 16px; color: white; margin: 0;"><span data-i18n="ai_assistant_desc"></span></p>
@@ -854,7 +854,7 @@
                       <div style="position: relative; width: 100%">
                         <input type="password" class="form-input" id="currentPassword" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
                         <span id="currentPwdIcon" onclick="togglePasswordVisibility('currentPassword', 'currentPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
-                          <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                          <img src="/images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
                         </span>
                       </div>
                     </div>
@@ -863,7 +863,7 @@
                       <div style="position: relative; width: 100%">
                         <input type="password" class="form-input" id="newPassword" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
                         <span id="newPwdIcon" onclick="togglePasswordVisibility('newPassword', 'newPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
-                          <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                          <img src="/images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
                         </span>
                       </div>
                     </div>
@@ -872,7 +872,7 @@
                       <div style="position: relative; width: 100%">
                         <input type="password" class="form-input" id="confirmPassword" style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
                         <span id="confirmPwdIcon" onclick="togglePasswordVisibility('confirmPassword', 'confirmPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
-                          <img src="./images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
+                          <img src="/images/view.png" alt="Toggle Password" style="width: 20px; height: 20px; opacity: 0.6" />
                         </span>
                       </div>
                     </div>
@@ -1092,10 +1092,10 @@
 
         if (input.type === "password") {
           input.type = "text";
-          iconImg.src = "./images/hide.png";
+          iconImg.src = "/images/hide.png";
         } else {
           input.type = "password";
-          iconImg.src = "./images/view.png";
+          iconImg.src = "/images/view.png";
         }
       }
 
@@ -1654,7 +1654,7 @@
 
       function updateThemeIcon(isDark) {
         document.querySelectorAll('.theme-icon').forEach(icon => {
-          icon.src = isDark ? './images/lightmode.png' : './images/darkmode.png'; 
+          icon.src = isDark ? '/images/lightmode.png' : '/images/darkmode.png'; 
         });
       }
 
@@ -1681,6 +1681,7 @@
       }
     });
   </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   </body>
   </body>
 </html>
