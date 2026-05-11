@@ -149,12 +149,12 @@
               <div class="form-group">
                 <label class="form-label"><span data-i18n="password"></span></label>
                 <div style="position: relative; width: 100%">
-  <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" data-i18n-placeholder="enter_password" required style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
-  
-  <span id="loginPwdIcon" onclick="togglePasswordVisibility('loginPassword', 'loginPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
-    <i data-lucide="eye-off" class="w-5 h-5 opacity-60"></i>
-  </span>
-</div>
+                  <input type="password" class="form-input" id="loginPassword" placeholder="Enter password" data-i18n-placeholder="enter_password" required style="width: 100%; padding-right: 40px; box-sizing: border-box;" />
+                  <span id="loginPwdIcon" onclick="togglePasswordVisibility('loginPassword', 'loginPwdIcon')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; user-select: none; display: flex; align-items: center;">
+                    <i data-lucide="eye" class="w-5 h-5 opacity-60"></i>
+                  </span>
+                </div>
+              </div>
 
               <div id="registerOnlyFields" style="display: none">
                 <div class="form-group">
@@ -1085,28 +1085,20 @@
         }
       }
 
-      function togglePasswordVisibility(element) {
-  // 1. 找到旁邊的輸入框
-  const container = element.parentElement;
+      function togglePasswordVisibility(button) {
+  // 使用 closest 確保無論點到 button 還是裡面的 i 都能運作
+  const container = button.closest('.relative'); // 或是你包裹 input 的那個 div class
   const input = container.querySelector('input');
+  const icon = button.querySelector('i');
 
-  if (!input) {
-    console.error("找不到密碼輸入框");
-    return;
-  }
-
-  // 2. 切換密碼顯示狀態，並直接覆寫 span 裡面的 HTML
   if (input.type === 'password') {
-    // 變成純文字，並放入「睜眼」圖示
     input.type = 'text';
-    element.innerHTML = '<i data-lucide="eye" class="w-5 h-5 opacity-60"></i>';
+    icon.setAttribute('data-lucide', 'eye');
   } else {
-    // 變回密碼，並放入「閉眼」圖示
     input.type = 'password';
-    element.innerHTML = '<i data-lucide="eye-off" class="w-5 h-5 opacity-60"></i>';
+    icon.setAttribute('data-lucide', 'eye-off');
   }
 
-  // 3. 呼叫 Lucide 把我們剛剛塞進去的 <i> 標籤轉換成 SVG
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
