@@ -10,6 +10,7 @@ const https = require('https');
 
 const PORT = process.env.PORT || 3000;
 const app = express(); // <--- 1. 建立 app
+app.use(express.static('public'));
 
 // ================= Firebase 初始化 =================
 let serviceAccount;
