@@ -1086,19 +1086,28 @@
       }
 
       function togglePasswordVisibility(button) {
-  // 使用 closest 確保無論點到 button 還是裡面的 i 都能運作
-  const container = button.closest('.relative'); // 或是你包裹 input 的那個 div class
+  // 1. 找到包裹 input 和按鈕的共同父容器 (假設你的 HTML 是放在一個 div 裡)
+  const container = button.parentElement; 
   const input = container.querySelector('input');
   const icon = button.querySelector('i');
 
+  if (!input || !icon) {
+    console.error("找不到輸入框或圖示，請檢查 HTML 結構");
+    return;
+  }
+
+  // 2. 切換輸入框類型
   if (input.type === 'password') {
     input.type = 'text';
+    // 改為「睜眼」圖示
     icon.setAttribute('data-lucide', 'eye');
   } else {
     input.type = 'password';
+    // 改為「閉眼」圖示
     icon.setAttribute('data-lucide', 'eye-off');
   }
 
+  // 3. 關鍵：強制 Lucide 重新渲染 (否則圖示不會變)
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
