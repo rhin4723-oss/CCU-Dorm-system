@@ -1464,7 +1464,7 @@ function fetchNotifications() {
           
           new Notification(notifTitle, {
             body: notifMsg,
-            icon: "./images/notifications.png"
+            icon: "/images/notifications.png"
           });
         }
       }
