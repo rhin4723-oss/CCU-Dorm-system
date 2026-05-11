@@ -1085,32 +1085,19 @@
         }
       }
 
-      function togglePasswordVisibility(element) {
-  // 1. 從點擊的 span 往上找到父容器，再找到內部的 input
-  const container = element.parentElement;
-  const input = container.querySelector('input');
-  const icon = element.querySelector('i');
+      function togglePasswordVisibility(inputId, containerId) {
+        const input = document.getElementById(inputId);
+        const container = document.getElementById(containerId);
+        const iconImg = container.querySelector("img");
 
-  if (!input || !icon) return;
-
-  // 2. 判斷目前的類型並進行切換
-  if (input.type === 'password') {
-    // 切換為可見
-    input.type = 'text';
-    // 更換為「睜眼」圖示
-    icon.setAttribute('data-lucide', 'eye');
-  } else {
-    // 切換為不可見
-    input.type = 'password';
-    // 更換為「閉眼」圖示
-    icon.setAttribute('data-lucide', 'eye-off');
-  }
-
-  // 3. 重要：通知 Lucide 重新掃描並繪製新圖示
-  if (typeof lucide !== 'undefined') {
-    lucide.createIcons();
-  }
-}
+        if (input.type === "password") {
+          input.type = "text";
+          iconImg.src = "/images/hide.png";
+        } else {
+          input.type = "password";
+          iconImg.src = "/images/view.png";
+        }
+      }
 
       function toggleOtherVenue() {
         const venueSelect = document.getElementById("facVenue");
