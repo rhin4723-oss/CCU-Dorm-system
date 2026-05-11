@@ -1085,29 +1085,28 @@
         }
       }
 
-      function togglePasswordVisibility(button) {
-  // 1. 找到包裹 input 和按鈕的共同父容器 (假設你的 HTML 是放在一個 div 裡)
-  const container = button.parentElement; 
+      function togglePasswordVisibility(element) {
+  // 1. 從點擊的 span 往上找到父容器，再找到內部的 input
+  const container = element.parentElement;
   const input = container.querySelector('input');
-  const icon = button.querySelector('i');
+  const icon = element.querySelector('i');
 
-  if (!input || !icon) {
-    console.error("找不到輸入框或圖示，請檢查 HTML 結構");
-    return;
-  }
+  if (!input || !icon) return;
 
-  // 2. 切換輸入框類型
+  // 2. 判斷目前的類型並進行切換
   if (input.type === 'password') {
+    // 切換為可見
     input.type = 'text';
-    // 改為「睜眼」圖示
+    // 更換為「睜眼」圖示
     icon.setAttribute('data-lucide', 'eye');
   } else {
+    // 切換為不可見
     input.type = 'password';
-    // 改為「閉眼」圖示
+    // 更換為「閉眼」圖示
     icon.setAttribute('data-lucide', 'eye-off');
   }
 
-  // 3. 關鍵：強制 Lucide 重新渲染 (否則圖示不會變)
+  // 3. 重要：通知 Lucide 重新掃描並繪製新圖示
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
