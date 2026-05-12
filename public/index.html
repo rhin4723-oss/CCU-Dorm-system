@@ -573,6 +573,12 @@
                   <p style="font-size: 16px; color: white; margin: 0;"><span data-i18n="ai_assistant_desc"></span></p>
                 </div>
               </div>
+              <div class="card" style="margin-top: 24px; margin-bottom: 0px; padding: 16px 24px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="font-size: 20px;"></span>
+                  <input type="text" id="announcementSearchInput" class="form-input" placeholder="搜尋公告關鍵字 (例如: 暑宿、停電)..." oninput="filterAnnouncements()" style="margin-bottom: 0;" />
+                </div>
+              </div>
               <div id="internalAnnouncementSection" class="card" style="margin-top: 24px; display: none;">
   <h3 style="margin-bottom: 16px; color: #4a90e2; font-size: 24px; font-weight: bold;">
     🔔 <span data-i18n="internal_announcements_title">重要公告通知</span>
@@ -804,9 +810,9 @@
                   <div style="display: flex; align-items: center; gap: 12px;">
                     <label style="font-weight: 600; color: #64748b;" data-i18n="laundry_select_location">選擇區域：</label>
                     <select class="form-input" id="laundryLocationSelect" onchange="loadLaundryData()" style="width: auto; min-width: 200px;">
-                      <option value="yJL1OU" data-i18n="laundry_loc_de">DE棟</option>
                       <option value="Ecy94C" data-i18n="laundry_loc_c">C棟</option>
                       <option value="ehuYvg" data-i18n="laundry_loc_a">A棟</option>
+                      <option value="yJL1OU" data-i18n="laundry_loc_de">DE棟</option>
                     </select>
                     <button class="btn btn-primary" onclick="loadLaundryData()">↻</button>
                   </div>
