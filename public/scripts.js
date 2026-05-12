@@ -2399,25 +2399,11 @@ function renderAdminAnnManagement(list) {
   if (!container) return;
   
   container.innerHTML = list.map(ann => `
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee;">
-      <div>
-        <div style="font-weight: 600;">${ann.title}</div>
-        <div style="font-size: 12px; color: #999;">${ann.date}</div>
-      </div>
-      <button class="btn btn-danger" style="padding: 4px 10px; font-size: 12px;" onclick="deleteAnnouncement('${ann.id}')">刪除</button>
-    </div>
-  `).join("");
-}
-
-function renderAdminAnnManagement(list) {
-  const container = document.getElementById("adminAnnHistory");
-  if (!container) return;
-  
-  container.innerHTML = list.map(ann => `
     <div class="admin-ann-item" onclick="openInternalAnnDetail('${ann.id}')">
          
       <div style="flex: 1; padding-right: 16px;">
         <div style="font-weight: 600; color: #4a90e2; font-size: 16px; margin-bottom: 4px;">${ann.title}</div>
+        <!-- 這裡把日期顏色改深一點 (#64748b) -->
         <div style="font-size: 12px; color: #64748b;">發佈日期：${ann.date}</div>
       </div>
       
