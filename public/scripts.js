@@ -2418,7 +2418,6 @@ function renderAdminAnnManagement(list) {
          
       <div style="flex: 1; padding-right: 16px;">
         <div style="font-weight: 600; color: #4a90e2; font-size: 16px; margin-bottom: 4px;">${ann.title}</div>
-        <!-- 這裡把日期顏色改深一點 (#64748b) -->
         <div style="font-size: 12px; color: #64748b;">發佈日期：${ann.date}</div>
       </div>
       
