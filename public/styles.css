@@ -1009,7 +1009,6 @@ body:has(.sidebar.collapsed) .page-loader {
   width: calc(100% - 80px);
 }
 
-/* ===== 管理員歷史公告專用樣式 ===== /
 .admin-ann-item {
   display: flex;
   justify-content: space-between;
