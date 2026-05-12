@@ -1008,3 +1008,29 @@ body:has(.sidebar.collapsed) .page-loader {
   left: 80px;
   width: calc(100% - 80px);
 }
+
+/* ===== 管理員歷史公告專用樣式 ===== /
+.admin-ann-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background 0.2s;
+  background-color: transparent;
+}
+
+/ 淺色模式的 Hover 效果 (淺灰白) /
+.admin-ann-item:hover {
+  background-color: #f8fafc;
+}
+
+/ 深色模式的適配 /
+body.dark-mode .admin-ann-item {
+  border-bottom-color: #374151;
+}
+
+/ 深色模式的 Hover 效果 (深灰色，而不是亮白色) */
+body.dark-mode .admin-ann-item:hover {
+  ba

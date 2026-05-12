@@ -2409,6 +2409,28 @@ function renderAdminAnnManagement(list) {
   `).join("");
 }
 
+function renderAdminAnnManagement(list) {
+  const container = document.getElementById("adminAnnHistory");
+  if (!container) return;
+  
+  container.innerHTML = list.map(ann => `
+    <div class="admin-ann-item" onclick="openInternalAnnDetail('${ann.id}')">
+         
+      <div style="flex: 1; padding-right: 16px;">
+        <div style="font-weight: 600; color: #4a90e2; font-size: 16px; margin-bottom: 4px;">${ann.title}</div>
+        <!-- 這裡把日期顏色改深一點 (#64748b) -->
+        <div style="font-size: 12px; color: #64748b;">發佈日期：${ann.date}</div>
+      </div>
+      
+      <button class="btn btn-danger" style="padding: 6px 12px; font-size: 13px;" 
+              onclick="event.stopPropagation(); deleteAnnouncement('${ann.id}')">
+        刪除
+      </button>
+      
+    </div>
+  `).join("");
+}
+
 window.deleteAnnouncement = async function(id) {
   if (await window.showCustomConfirm("確定要刪除這則公告嗎？")) {
     await deleteDoc(doc(db, "internalAnnouncements", id));
